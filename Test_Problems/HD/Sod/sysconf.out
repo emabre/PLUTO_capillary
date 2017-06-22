@@ -1,0 +1,12 @@
+USER           = emabre
+WORKING_DIR    = /home/konrad/codici/PLUTO/Test_Problems/HD/Sod
+SYSTEM_NAME    = Linux
+NODE_NAME      = Torre
+RELEASE        = 3.13.0-119-generic
+ARCH           = x86_64
+BYTE_ORDER     = little
+VERSION        = #166-Ubuntu SMP Wed May 3 12:18:55 UTC 2017
+PLUTO_DIR      = /home/konrad/codici/PLUTO
+PLUTO_VERSION  = "4.2"
+C_COMPILER     = gcc
+MPI_C_COMPILER = mpicc

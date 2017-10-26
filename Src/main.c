@@ -1,22 +1,22 @@
 /* ///////////////////////////////////////////////////////////////////// */
-/*! 
-  \file  
+/*!
+  \file
   \brief PLUTO main function.
- 
-  The file main.c contains the PLUTO main function and several other 
+
+  The file main.c contains the PLUTO main function and several other
   top-level routines.
-  main() provides basic code initialization, handles the the principal 
+  main() provides basic code initialization, handles the the principal
   integration loop and calls the output driver write_data.c.
   Other useful functions contained in this file are Integrate() which does
   the actual integration, GetNextTimeStep() responsible for computing the
   next time step based on the information available at the last time
   level.
-  
+
   We use two slightly different integration loops depending on whether
   asnchrounous I/O has to be performed (macro USE_ASYNC_IO).
-  If the macro USE_ASYNC_IO is not defined, the standard 
+  If the macro USE_ASYNC_IO is not defined, the standard
   integration loop consists of the following steps:
- 
+
    - Check for last step & adjust dt if necessary
    - Dump log information, n, t(n), dt(n), MAX_MACH(n-1), etc..
    - Check output/analysis:  t(n) < tout < t(n)+dt(n)
@@ -27,9 +27,9 @@
    - [MPI] Get next time step dt(n+1)
    - [MPI] reduction operations (n)
    - Increment n --> n+1
- 
+
   Otherwise, using Asynchrounous I/O:
- 
+
    - Check for last step & adjust dt
    - check for output/analysis:   t(n) < tout < t(n+1)
      - Write data/call analysis using {U(n), t(n), dt(n)}
@@ -63,7 +63,7 @@ static void CheckForAnalysis (Data *, Runtime *, Grid *);
 /* ********************************************************************* */
 int main (int argc, char *argv[])
 /*!
- * Start PLUTO, initialize functions, define data structures and 
+ * Start PLUTO, initialize functions, define data structures and
  * handle the main integration loop.
  *
  * \param [in] argc Argument counts.
@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
   print1 ("  sizeof (float)    = %d\n", sizeof(float));
   print1 ("  sizeof (double)   = %d\n", sizeof(double));
   print1 ("  sizeof (*double)  = %d\n", sizeof(dbl_pnt));
-  
+
 /*
   print1 ("\n> Structure data type:\n");
   print1 ("  sizeof (CMD_LINE)   = %d\n", sizeof(Cmd_Line));
@@ -125,23 +125,23 @@ int main (int argc, char *argv[])
 
   Dts.cmax     = ARRAY_1D(NMAX_POINT, double);
   Dts.inv_dta  = 0.0;
-  Dts.inv_dtp  = 0.5e-38; 
+  Dts.inv_dtp  = 0.5e-38;
   Dts.dt_cool  = 1.e38;
   Dts.cfl      = ini.cfl;
   Dts.cfl_par  = ini.cfl_par;
   Dts.rmax_par = ini.rmax_par;
   Dts.Nsts     = Dts.Nrkc = 0;
-  
+
   Solver = SetSolver (ini.solv_type);
-  
+
   time (&tbeg);
   g_stepNumber = 0;
-  
+
 /* --------------------------------------------------------
-    Check if restart is necessary. 
+    Check if restart is necessary.
     If not, write initial condition to disk.
    ------------------------------------------------------- */
-   
+
   if (cmd_line.restart == YES) {
     RestartFromFile (&ini, cmd_line.nrestart, DBL_OUTPUT, grd);
   }else if (cmd_line.h5restart == YES){
@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
 
   /* ------------------------------------------------------
       Check if this is the last integration step:
-      - final tstop has been reached: adjust time step 
+      - final tstop has been reached: adjust time step
       - or max number of steps has been reached
      ------------------------------------------------------ */
 
@@ -184,7 +184,7 @@ int main (int argc, char *argv[])
 
     if (g_stepNumber%ini.log_freq == 0) {
       print1 ("step:%d ; t = %10.4e ; dt = %10.4e ; %d %% ; [%f, %d",
-               g_stepNumber, g_time, g_dt, (int)(100.0*g_time/ini.tstop), 
+               g_stepNumber, g_time, g_dt, (int)(100.0*g_time/ini.tstop),
                g_maxMach, g_maxRiemannIter);
 /*      if (g_maxRootIter > 0) print1 (", root it. # = %d",g_maxRootIter);  */
       #if (PARABOLIC_FLUX & SUPER_TIME_STEPPING)
@@ -193,7 +193,7 @@ int main (int argc, char *argv[])
       #if (PARABOLIC_FLUX & RK_CHEBYSHEV)
        print1 (", Nrkc = %d",Dts.Nrkc);
       #endif
-      print1 ("]\n");      
+      print1 ("]\n");
     }
 
   /* ------------------------------------------------------
@@ -209,10 +209,10 @@ int main (int argc, char *argv[])
       Advance solution array by a single time step
       g_dt = dt(n)
      ------------------------------------------------------ */
-
-    if (cmd_line.jet != -1) SetJetDomain (&data, cmd_line.jet, ini.log_freq, grd); 
+  /*[Ema]: here is the actual step advancing the solution!*/
+    if (cmd_line.jet != -1) SetJetDomain (&data, cmd_line.jet, ini.log_freq, grd);
     err = Integrate (&data, Solver, &Dts, grd);
-    if (cmd_line.jet != -1) UnsetJetDomain (&data, cmd_line.jet, grd); 
+    if (cmd_line.jet != -1) UnsetJetDomain (&data, cmd_line.jet, grd);
 
   /* ------------------------------------------------------
        Integration didn't go through. Step must
@@ -279,9 +279,9 @@ int main (int argc, char *argv[])
   /* ------------------------------------------------------
           Global MPI reduction operations
      ------------------------------------------------------ */
-  
+
     #ifdef PARALLEL
-     MPI_Allreduce (&g_maxMach, &scrh, 1, 
+     MPI_Allreduce (&g_maxMach, &scrh, 1,
                     MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
      g_maxMach = scrh;
 
@@ -290,7 +290,7 @@ int main (int argc, char *argv[])
     #endif
 
     g_stepNumber++;
-    
+
     first_step = 0;
   }
 
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
 
   /* ------------------------------------------------------
       Check if this is the last integration step:
-      - final tstop has been reached: adjust time step 
+      - final tstop has been reached: adjust time step
       - or max number of steps has been reached
      ------------------------------------------------------ */
 
@@ -350,9 +350,9 @@ int main (int argc, char *argv[])
   /* ------------------------------------------------------
           Global MPI reduction operations
      ------------------------------------------------------ */
-  
+
     #ifdef PARALLEL
-     MPI_Allreduce (&g_maxMach, &scrh, 1, 
+     MPI_Allreduce (&g_maxMach, &scrh, 1,
                     MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
      g_maxMach = scrh;
 
@@ -374,7 +374,7 @@ int main (int argc, char *argv[])
 
     if (g_stepNumber%ini.log_freq == 0) {
       print1 ("step:%d ; t = %10.4e ; dt = %10.4e ; %d %% ; [%f, %d",
-               g_stepNumber, g_time, g_dt, (int)(100.0*g_time/ini.tstop), 
+               g_stepNumber, g_time, g_dt, (int)(100.0*g_time/ini.tstop),
                g_maxMach, g_maxRiemannIter);
       #if (PARABOLIC_FLUX & SUPER_TIME_STEPPING)
        print1 (", Nsts = %d",Dts.Nsts);
@@ -382,17 +382,17 @@ int main (int argc, char *argv[])
       #if (PARABOLIC_FLUX & RK_CHEBYSHEV)
        print1 (", Nrkc = %d",Dts.Nrkc);
       #endif
-      print1 ("]\n");      
+      print1 ("]\n");
     }
-    
+
   /* ------------------------------------------------------
       Advance solution array by a single time step
       g_dt = dt(n)
      ------------------------------------------------------ */
 
-    if (cmd_line.jet != -1) SetJetDomain (&data, cmd_line.jet, ini.log_freq, grd); 
+    if (cmd_line.jet != -1) SetJetDomain (&data, cmd_line.jet, ini.log_freq, grd);
     err = Integrate (&data, Solver, &Dts, grd);
-    if (cmd_line.jet != -1) UnsetJetDomain (&data, cmd_line.jet, grd); 
+    if (cmd_line.jet != -1) UnsetJetDomain (&data, cmd_line.jet, grd);
 
   /* ------------------------------------------------------
        Integration didn't go through. Step must
@@ -423,7 +423,7 @@ int main (int argc, char *argv[])
 #endif /* USE_ASYNC_IO */
 
 /* =====================================================================
-          M A I N       L O O P      E N D S       H E R E 
+          M A I N       L O O P      E N D S       H E R E
    ===================================================================== */
 
   if (cmd_line.write){
@@ -446,7 +446,7 @@ int main (int argc, char *argv[])
   time(&tend);
   g_dt = difftime(tend, tbeg);
   print1("> Elapsed time             %s\n", TotalExecutionTime(g_dt));
-  print1("> Average time/step       %10.2e  (sec)  \n", 
+  print1("> Average time/step       %10.2e  (sec)  \n",
           difftime(tend,tbeg)/(double)g_stepNumber);
   print1("> Local time                %s",asctime(localtime(&tend)));
   print1("> Done\n");
@@ -469,14 +469,14 @@ int Integrate (Data *d, Riemann_Solver *Solver, Time_Step *Dts, Grid *grid)
  * \param  Solver pointer to a Riemann solver function;
  * \param  Dts    pointer to time Step structure;
  * \param  grid   pointer to grid structure.
- * 
+ *
  * \return An integer giving success / failure (development).
- * 
+ *
  ********************************************************************** */
 {
   int idim, err = 0;
   int i,j,k;
-  
+
   g_maxMach = 0.0;
   g_maxRiemannIter = 0;
   g_maxRootIter    = 0;
@@ -484,15 +484,15 @@ int Integrate (Data *d, Riemann_Solver *Solver, Time_Step *Dts, Grid *grid)
 /* -------------------------------------------------------
     Initialize max propagation speed in Dedner's approach
    ------------------------------------------------------- */
-
+  /*[Ema] I think this "GLM_MHD" has only to do with the control of the divergence of B*/
   #ifdef GLM_MHD  /* -- initialize glm_ch -- */
-   GLM_Init (d, Dts, grid);   
+   GLM_Init (d, Dts, grid);
    GLM_Source (d->Vc, 0.5*g_dt, grid);
   #endif
 
   /* ---------------------------------------------
-        perform Strang Splitting on directions 
-        (if necessary) and sources 
+        perform Strang Splitting on directions
+        (if necessary) and sources
      --------------------------------------------- */
 
   TOT_LOOP(k,j,i) d->flag[k][j][i] = 0;
@@ -522,7 +522,7 @@ int Integrate (Data *d, Riemann_Solver *Solver, Time_Step *Dts, Grid *grid)
     #else
      if (AdvanceStep (d, Solver, Dts, grid) != 0) return(1);
     #endif
-  }       
+  }
 
   #ifdef GLM_MHD  /* -- GLM source for dt/2 -- */
    GLM_Source (d->Vc, 0.5*g_dt, grid);
@@ -535,9 +535,9 @@ int Integrate (Data *d, Riemann_Solver *Solver, Time_Step *Dts, Grid *grid)
 char *TotalExecutionTime (double dt)
 /*!
  *
- *   convert a floating-point variable (dt, in seconds) to a string 
+ *   convert a floating-point variable (dt, in seconds) to a string
  *   displaying days:hours:minutes:seconds
- *   
+ *
  *********************************************************************** */
 {
   static char c[128];
@@ -617,10 +617,10 @@ double NextTimeStep (Time_Step *Dts, Runtime *ini, Grid *grid)
   #endif
 
 /* ---------------------------------------------------------
-   4. With STS, the ratio between advection (full) and 
+   4. With STS, the ratio between advection (full) and
       parabolic time steps should not exceed ini->rmax_par.
    --------------------------------------------------------- */
-      
+
   #if (PARABOLIC_FLUX & SUPER_TIME_STEPPING) || (PARABOLIC_FLUX & RK_CHEBYSHEV)
    dt_par  = ini->cfl_par/(2.0*Dts->inv_dtp);
    dtnext *= MIN(1.0, ini->rmax_par/(dt_adv/dt_par));
@@ -633,9 +633,9 @@ double NextTimeStep (Time_Step *Dts, Runtime *ini, Grid *grid)
   #if COOLING != NO
    dtnext = MIN(dtnext, Dts->dt_cool);
   #endif
-   
+
 /* --------------------------------------------------------------
-    6. Allow time step to vary at most by a factor 
+    6. Allow time step to vary at most by a factor
        ini->cfl_max_var.
        Quit if dt gets too small, issue a warning if first_dt has
        been overestimated.
@@ -668,7 +668,7 @@ double NextTimeStep (Time_Step *Dts, Runtime *ini, Grid *grid)
 void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
 /*!
  *  Check if file output has to be performed.
- *  
+ *
  *********************************************************************** */
 {
   static int first_call = 1;
@@ -683,7 +683,7 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
   restart_update = 0;
   t     = g_time;
   tnext = t + g_dt;
-  
+
   last_step = (fabs(t-ini->tstop) < 1.e-12 ? 1:0);
 
 /* -- on first execution initialize
@@ -700,31 +700,31 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
     #else
      for (n = 0; n < MAX_OUTPUT_TYPES; n++) time(clock_beg + n);
     #endif
-  } 
+  }
 
 /* -- get current time -- */
 
-  #ifdef PARALLEL  
+  #ifdef PARALLEL
    if (prank == 0) tend = MPI_Wtime();
    MPI_Bcast(&tend, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   #else
    time(&clock_end);
   #endif
-  
+
 /* -------------------------------------------------------
           start main loop on outputs
    ------------------------------------------------------- */
-   
+
   for (n = 0; n < MAX_OUTPUT_TYPES; n++){
-    output = ini->output + n;    
-    check_dt = check_dn = check_dclock = 0; 
+    output = ini->output + n;
+    check_dt = check_dn = check_dclock = 0;
 
   /* -- check time interval in code units (dt) -- */
 
     if (output->dt > 0.0){
       check_dt = (int) (tnext/output->dt) - (int)(t/output->dt);
       check_dt = check_dt || g_stepNumber == 0 || last_step;
-    }   
+    }
 
   /* -- check time interval in number of steps (dn) -- */
 
@@ -748,7 +748,7 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
         #else
          time(clock_beg + n);
         #endif
-      }else{ 
+      }else{
         check_dclock = 0;
       }
       check_dclock = check_dclock || g_stepNumber == 0 || last_step;
@@ -756,7 +756,7 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
 
   /* -- if any of the previous is true dump data to disk -- */
 
-    if (check_dt || check_dn || check_dclock) { 
+    if (check_dt || check_dn || check_dclock) {
 
       #ifdef USE_ASYNC_IO
        if (!strcmp(output->mode,"single_file_async")){
@@ -764,9 +764,9 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
        }else{
          WriteData(d, output, grid);
        }
-      #else     
+      #else
        WriteData(d, output, grid);
-      #endif   
+      #endif
 
     /* ----------------------------------------------------------
         save the file number of the dbl and dbl.h5 output format
@@ -779,7 +779,7 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
   }
 
 /* -------------------------------------------------------
-    Dump restart information if required 
+    Dump restart information if required
 
     Note that if both dbl and dbl.h5 formats are used,
     bookkeeping is done using dbl format.
@@ -794,7 +794,7 @@ void CheckForOutput (Data *d, Runtime *ini, Grid *grid)
 void CheckForAnalysis (Data *d, Runtime *ini, Grid *grid)
 /*
  *
- * PURPOSE 
+ * PURPOSE
  *
  *   Check if Analysis needs to be called
  *
@@ -806,7 +806,7 @@ void CheckForAnalysis (Data *d, Runtime *ini, Grid *grid)
   t     = g_time;
   tnext = t + g_dt;
   check_dt = (int) (tnext/ini->anl_dt) - (int)(t/ini->anl_dt);
-  check_dt = check_dt || g_stepNumber == 0 || fabs(t - ini->tstop) < 1.e-9; 
+  check_dt = check_dt || g_stepNumber == 0 || fabs(t - ini->tstop) < 1.e-9;
   check_dt = check_dt && (ini->anl_dt > 0.0);
 
   check_dn = (g_stepNumber%ini->anl_dn) == 0;

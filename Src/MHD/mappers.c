@@ -3,18 +3,18 @@
   \file
   \brief Convert between primitive and conservative variables.
 
-  The PrimToCons() converts an array of primitive quantities to 
+  The PrimToCons() converts an array of primitive quantities to
   an array of conservative variables for the MHD equations.
-  
-  The ConsToPrim() converts an array of conservative quantities to 
+
+  The ConsToPrim() converts an array of conservative quantities to
   an array of primitive quantities.
-  During the conversion, pressure is normally recovered from total 
+  During the conversion, pressure is normally recovered from total
   energy unless zone has been tagged with FLAG_ENTROPY.
   In this case we recover pressure from conserved entropy:
-  
+
       if (FLAG_ENTROPY is TRUE)  --> p = p(S)
       else                       --> p = p(E)
-  
+
   \author A. Mignone (mignone@ph.unito.it)
   \date   June 24, 2015
 */
@@ -24,7 +24,7 @@
 /* ********************************************************************* */
 void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
 /*!
- * Convert primitive variables in conservative variables. 
+ * Convert primitive variables in conservative variables.
  *
  * \param [in]  uprim array of primitive variables
  * \param [out] ucons array of conservative variables
@@ -41,24 +41,24 @@ void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
   gmm1 = g_gamma - 1.0;
 #endif
   for (i = ibeg; i <= iend; i++) {
-  
+
     v = uprim[i];
     u = ucons[i];
 
     u[RHO] = v[RHO];
-        
+    /*[Ema] Computes momentum*/
     EXPAND (u[MX1] = v[RHO]*v[VX1];  ,
             u[MX2] = v[RHO]*v[VX2];  ,
             u[MX3] = v[RHO]*v[VX3];)
-
+    /*[Ema] The magentic field is the same*/
     EXPAND (u[BX1] = v[BX1];  ,
             u[BX2] = v[BX2];  ,
             u[BX3] = v[BX3];)
-
+    /*[Ema] Computes kinetic energy plus magnetic energy*/
     kinb2   = EXPAND(v[VX1]*v[VX1], + v[VX2]*v[VX2], + v[VX3]*v[VX3]);
     kinb2   = v[RHO]*kinb2 + EXPAND(v[BX1]*v[BX1], + v[BX2]*v[BX2], + v[BX3]*v[BX3]);
     kinb2  *= 0.5;
-
+    /*[Ema] Computes internal energy*/
 #if EOS == IDEAL
     u[ENG] = kinb2 + v[PRS]/gmm1;
 #elif EOS == PVTE_LAW
@@ -75,17 +75,17 @@ void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
       QUIT_PLUTO(1);
     }
 #endif
-    
+
 #ifdef GLM_MHD
-    u[PSI_GLM] = v[PSI_GLM]; 
+    u[PSI_GLM] = v[PSI_GLM];
 #endif
-#if NSCL > 0 
+#if NSCL > 0
     NSCL_LOOP(nv) u[nv] = v[RHO]*v[nv];
-#endif    
+#endif
   }
 }
 /* ********************************************************************* */
-int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend, 
+int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
                 unsigned char *flag)
 /*!
  * Convert from conservative to primitive variables.
@@ -98,11 +98,11 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
  *                         where entropy must be used to recover pressure
  *                         and, on output, zones where conversion was
  *                         not successful.
- * 
- * \return Return 0 if conversion was successful in all zones in the 
+ *
+ * \return Return 0 if conversion was successful in all zones in the
  *         range [ibeg,iend].
  *         Return 1 if one or more zones could not be converted correctly
- *         and either pressure, density or energy took non-physical values. 
+ *         and either pressure, density or energy took non-physical values.
  *
  *********************************************************************** */
 {
@@ -126,7 +126,7 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
     b2 = EXPAND(u[BX1]*u[BX1], + u[BX2]*u[BX2], + u[BX3]*u[BX3]);
 
   /* -- Check density positivity -- */
-  
+
     if (u[RHO] < 0.0) {
       print("! ConsToPrim: negative density (%8.2e), ", u[RHO]);
       Where (i, NULL);
@@ -147,7 +147,7 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
            v[BX2] = u[BX2];  ,
            v[BX3] = u[BX3];)
 
-    kinb2 = 0.5*(m2*tau + b2);    
+    kinb2 = 0.5*(m2*tau + b2);
 
   /* -- Check energy positivity -- */
 
@@ -171,7 +171,7 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
     use_energy  = !use_entropy;
     if (use_entropy){
       rhog1 = pow(rho, gmm1);
-      v[PRS] = u[ENTR]*rhog1; 
+      v[PRS] = u[ENTR]*rhog1;
       if (v[PRS] < 0.0){
         WARNING(
                print("! ConsToPrim: negative p(S) (%8.2e, %8.2e), ", v[PRS], u[ENTR]);
@@ -204,29 +204,29 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
 
     #if NSCL > 0
     NSCL_LOOP(nv) v[nv] = u[nv]*tau;
-    #endif    
+    #endif
 
 #elif EOS == PVTE_LAW
 
   /* -- Convert scalars here since EoS may need ion fractions -- */
 
-    #if NSCL > 0                       
+    #if NSCL > 0
     NSCL_LOOP(nv) v[nv] = u[nv]*tau;
-    #endif    
+    #endif
 
     if (u[ENG] != u[ENG]){
       print("! ConsToPrim: NaN found\n");
       Show(ucons,i);
       QUIT_PLUTO(1);
     }
-    rhoe  = u[ENG] - kinb2; 
+    rhoe  = u[ENG] - kinb2;
 
     err = GetEV_Temperature (rhoe, v, &T);
     if (err){  /* If something went wrong while retrieving the  */
                /* temperature, we floor \c T to \c T_CUT_RHOE,  */
                /* recompute internal and total energies.        */
       T = T_CUT_RHOE;
-      WARNING(  
+      WARNING(
         print ("! ConsToPrim: rhoe < 0 or T < T_CUT_RHOE; ");
         Where(i,NULL);
       )
@@ -248,7 +248,7 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
 #endif
 
 #ifdef GLM_MHD
-    v[PSI_GLM] = u[PSI_GLM]; 
+    v[PSI_GLM] = u[PSI_GLM];
 #endif
   }
   return ifail;

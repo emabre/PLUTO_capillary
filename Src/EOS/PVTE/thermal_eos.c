@@ -3,48 +3,48 @@
   \file
   \brief Thermodynamic relations for the thermal EoS, \c p=nkT and
          <tt> T=p/(nK) </tt>.
-  
-  Collect miscellaneous functions involving computations with the 
+
+  Collect miscellaneous functions involving computations with the
   thermal equation of state,
   \f[
-       p = nk_BT \quad {\rm(in\; cgs)} 
+       p = nk_BT \quad {\rm(in\; cgs)}
        \qquad \Longrightarrow\qquad
-       p = \frac{\rho T}{K\mu(\vec{X})} \quad {\rm(in\; code\quad units)} 
+       p = \frac{\rho T}{K\mu(\vec{X})} \quad {\rm(in\; code\quad units)}
   \f]
-  where, in the second expression, \c rho and \c p are density and 
-  pressure (in code units), \c T is the temperature (in Kelvin), \c K 
-  is the \c ::KELVIN dimensionalization constant, \c mu(\b X) is the mean 
-  molecular weight and \b X is an array containing the ionization fractions 
+  where, in the second expression, \c rho and \c p are density and
+  pressure (in code units), \c T is the temperature (in Kelvin), \c K
+  is the \c ::KELVIN dimensionalization constant, \c mu(\b X) is the mean
+  molecular weight and \b X is an array containing the ionization fractions
   of different elements.
   The previous relation is typically used to compute
-  - <tt> p=p(T,rho,\b X) </tt> by calling Pressure(); 
+  - <tt> p=p(T,rho,\b X) </tt> by calling Pressure();
   - <tt> T=T(p,rho,\b X) </tt> by calling GetPV_Temperature().
     This relation can be either:
-    - \e Explicit: ion fractions are evolved independently using a 
+    - \e Explicit: ion fractions are evolved independently using a
       chemical reaction network (e.g. when  \c H2_COOL or \c SNEq is enabled).
-      Then one has \f$ T=(p/\rho) K\mu(\vec{X})\f$.  
-    - \e Implicit: ions are not evolved explicitly but are computed 
-      from equilibrium considerations (e.g. Saha of collisional ionization 
-      equilibrium) so that \c X=X(T,rho) and the mean molecular 
+      Then one has \f$ T=(p/\rho) K\mu(\vec{X})\f$.
+    - \e Implicit: ions are not evolved explicitly but are computed
+      from equilibrium considerations (e.g. Saha of collisional ionization
+      equilibrium) so that \c X=X(T,rho) and the mean molecular
       weight now depends on temperature.
       Then one has \f$T = (p/\rho) K \mu(T,\rho)\f$.
 
-  Nonlinear equation can be solved with a root finder (typically Brent's 
+  Nonlinear equation can be solved with a root finder (typically Brent's
   method) or a tabulated approach (default).
   In both case, a 2D table (::Ttab) of the temperature \c T(i,j) is
   pre-calculated for fixed values of \c p/rho and \c rho by
   MakePV_TemperatureTable() and stored into memory.
-  The table is then used to bracket the root (in the case of a root 
-  finder) or to replace the runtime computation with a simpler 
-  array indexing operation followed by a combination of lookup table 
+  The table is then used to bracket the root (in the case of a root
+  finder) or to replace the runtime computation with a simpler
+  array indexing operation followed by a combination of lookup table
   and bilinear (direct or inverse) interpolation.
-  
+
   \author A. Mignone (mignone@ph.unito.it)\n
           B. Vaidya
   \date   31 Aug, 2014
 */
 /* /////////////////////////////////////////////////////////////////// */
-#include "pluto.h" 
+#include "pluto.h"
 
 #ifndef PV_TEMPERATURE_TABLE_NX
  #define PV_TEMPERATURE_TABLE_NX     768
@@ -53,8 +53,8 @@
  #define PV_TEMPERATURE_TABLE_NY     768
 #endif
 
-static Table2D  Ttab; /**< A 2D table containing pre-computed values of 
-                           temperature stored at equally spaced node values 
+static Table2D  Ttab; /**< A 2D table containing pre-computed values of
+                           temperature stored at equally spaced node values
                            of <tt> Log(p/rho) </tt> and \c Log(rho)  */
 #if NIONS == 0
 static double TFunc(double T, void *par);
@@ -62,8 +62,8 @@ static double TFunc(double T, void *par);
 /* ********************************************************************* */
 void MakePV_TemperatureTable()
 /*!
- * Pre-calculate a 2D table of temperature <tt>T(p,rho)</tt> by 
- * inverting, at specified values of \c p and \c rho, the nonlinear 
+ * Pre-calculate a 2D table of temperature <tt>T(p,rho)</tt> by
+ * inverting, at specified values of \c p and \c rho, the nonlinear
  * equation (only in LTE or CIE)
  * \f[
  *   f(T) = T - \frac{p}{\rho} K\mu(T,\rho) = 0
@@ -71,10 +71,10 @@ void MakePV_TemperatureTable()
  *   T_{ij} = T(x_i, y_j) \qquad
  *   \left(x=\log_{10}\frac{p}{\rho}\,,\quad y=\log_{10}\rho\right)
  * \f]
- * For convenience, the table is constructed using equally 
- * spaced bins of <tt>x=log10(p/rho)</tt> and <tt>y=log10(rho)</tt> 
- * where \c p and \c rho are in code units. 
- * This function must be called only once to initialize the 2D table 
+ * For convenience, the table is constructed using equally
+ * spaced bins of <tt>x=log10(p/rho)</tt> and <tt>y=log10(rho)</tt>
+ * where \c p and \c rho are in code units.
+ * This function must be called only once to initialize the 2D table
  * \c ::Ttab.
  *
  *********************************************************************** */
@@ -87,18 +87,18 @@ void MakePV_TemperatureTable()
   print1 ("> MakePV_TemperatureTable: Generating table...\n");
 
 /* --------------------------------------------------------------
-    Initialize table. The two table axis are given by 
-    ln(x) = log(p/rho) and ln(y) = log(rho). 
-    The lower and upper x-bounds correspond to T/mu = 1 K and 
+    Initialize table. The two table axis are given by
+    ln(x) = log(p/rho) and ln(y) = log(rho).
+    The lower and upper x-bounds correspond to T/mu = 1 K and
     T/mu = 10^7 K, respectively.
    -------------------------------------------------------------- */
 
-  InitializeTable2D(&Ttab,1.0/KELVIN, 1.e7/KELVIN, PV_TEMPERATURE_TABLE_NX, 
+  InitializeTable2D(&Ttab,1.0/KELVIN, 1.e7/KELVIN, PV_TEMPERATURE_TABLE_NX,
                           1.e-7     , 1.e7, PV_TEMPERATURE_TABLE_NY);
 
 /* -----------------------------------------------------------------
-    Guess the smallest and largest value of \mu. 
-    This is likely to happen at very low and very high temperatures  
+    Guess the smallest and largest value of \mu.
+    This is likely to happen at very low and very high temperatures
    ----------------------------------------------------------------- */
 
   GetMu(1.0,   1.0, &mu_lo);
@@ -111,15 +111,15 @@ void MakePV_TemperatureTable()
     rho = Ttab.y[j];
 
     par.T1     = T1;
-    par.v[RHO] = rho; 
+    par.v[RHO] = rho;
 
-  /* -- set interval endpoints for root finder -- */ 
-    
+  /* -- set interval endpoints for root finder -- */
+
     Tlo = par.T1*mu_lo;  /*  T > T1*mu_\min  */
     Thi = par.T1*mu_hi;  /*  T < T1*mu_\max  */
-     
+
 /*    status = Ridder(TFunc, &par, Tlo, Thi, -1, 1.0e-12, &T); */
-    status = Brent(TFunc, &par, Tlo, Thi, -1, 1.0e-12, &T);    
+    status = Brent(TFunc, &par, Tlo, Thi, -1, 1.0e-12, &T);
     if (status != 0) {
       print1 ("! MakePV_TemperatureTable: ");
       print1 ("root could not be found [%d]\n",status);
@@ -127,9 +127,9 @@ void MakePV_TemperatureTable()
     }
     Ttab.f[j][i] = T;
   }}
-  
+
   FinalizeTable2D(&Ttab);
-  if (prank == 0)  WriteBinaryTable2D("T_tab.bin",&Ttab);  
+  if (prank == 0)  WriteBinaryTable2D("T_tab.bin",&Ttab);
 
 #if 0 /* Table-to-Table conversion: attempt to interpolate from another table */
 {
@@ -169,7 +169,7 @@ mu = 1.2 + 0.0/cosh(mu*mu);
   if (prank == 0)  WriteBinaryTable2D("T_tab2.bin",&Ttab);
 
   printf ("KELVIN = %12.6e\n",KELVIN);
-  exit(1); 
+  exit(1);
 }
 #endif /* 0 */
 }
@@ -179,17 +179,17 @@ mu = 1.2 + 0.0/cosh(mu*mu);
 double Pressure(double *v, double T)
 /*!
  * Return pressure as a function of temperature, density and fractions.
- * If <tt>T(p/rho,rho)</tt> has been tabulated, this requires 
+ * If <tt>T(p/rho,rho)</tt> has been tabulated, this requires
  * inverting the table by calling InverseLookupTable2D().
  *
- * \param [in]  v     a pointer to a vector of primitive quantities 
+ * \param [in]  v     a pointer to a vector of primitive quantities
  *                    (only density and fractions will be actually used).
  * \param [in]  T     The temperature (in Kelvin);
  *
- * \return Pressure in code units.                   
+ * \return Pressure in code units.
  *********************************************************************** */
 {
-#if PV_TEMPERATURE_TABLE == YES 
+#if PV_TEMPERATURE_TABLE == YES
 
   int    status;
   double rho, T1;
@@ -200,7 +200,7 @@ double Pressure(double *v, double T)
     print ("! Pressure: table interpolation failure [rho = %12.6e]\n", rho);
     QUIT_PLUTO(1);
   }
-  
+
   return T1*rho;
 
 #else
@@ -220,7 +220,7 @@ double Pressure(double *v, double T)
 /* ********************************************************************* */
 int GetPV_Temperature (double *v, double *T)
 /*!
- *  Compute gas temperature (in Kelvin) from density, pressure 
+ *  Compute gas temperature (in Kelvin) from density, pressure
  *  and fractions:
  *  \f[
  *     T = \left\{\begin{array}{ll}
@@ -242,11 +242,11 @@ int GetPV_Temperature (double *v, double *T)
  *********************************************************************** */
 {
   int status;
-
+/* [Ema]NIONS==0 corresponds to a "NO chemical network" case see the initial doc of this file*/
 #if NIONS == 0 && PV_TEMPERATURE_TABLE == YES
 
   double rho, T1;
-  
+
   if (v[PRS] < 0.0) return 1;
 
   rho    = v[RHO];
@@ -256,7 +256,7 @@ int GetPV_Temperature (double *v, double *T)
   if (status != 0){
     print ("! GetPV_Temperature: table interpolation failure ");
     print ("[T1 = %8.3e, rho = %8.3e]\n",T1,rho);
-    
+
     if (status == -1) return 1;      /* hit lower x range (easy fix) */
     else              QUIT_PLUTO(1); /* not so easy to fix */
   }
@@ -264,7 +264,7 @@ int GetPV_Temperature (double *v, double *T)
   if (*T < T_CUT_RHOE) return 1;
   else                 return 0;
 
-#elif NIONS == 0 && PV_TEMPERATURE_TABLE == NO 
+#elif NIONS == 0 && PV_TEMPERATURE_TABLE == NO
 
   int    i,j;
   double Tmin, Tmax, lnx, lny, rho, prs;
@@ -295,7 +295,7 @@ int GetPV_Temperature (double *v, double *T)
 
 /*  status = Ridder(TFunc, &p, Tmin, Tmax, -1, 1.0e-7, &T);  */
   status = Brent(TFunc, &par, Tmin, Tmax, -1, 1.0e-7, T);
-  if (status != 0){ 
+  if (status != 0){
     print ("! PrimitiveTemperature: could not find root, ");
     print ("! [Tmin, Tmax] = [%12.6e, %12.6e]\n",Tmin, Tmax);
     QUIT_PLUTO(1);
@@ -303,14 +303,14 @@ int GetPV_Temperature (double *v, double *T)
 
   if (*T < T_CUT_RHOE || status != 0) return 1;
   return 0;
-  
+
 #else
 
   *T = (v[PRS]/v[RHO])*KELVIN*MeanMolecularWeight(v);
   if (*T < T_CUT_RHOE) return 1;
   return 0;
-   
-#endif 
+
+#endif
 
 }
 
@@ -318,22 +318,21 @@ int GetPV_Temperature (double *v, double *T)
 /* ********************************************************************* */
 double TFunc(double T, void *par)
 /*!
- * Return the nonlinear function <tt> f(T) = T - T1 mu(T,rho)</tt> used 
+ * Return the nonlinear function <tt> f(T) = T - T1 mu(T,rho)</tt> used
  * by the root finder to find temperature \c T.
  *
  * \param [in] T    The temperature in Kelvin
- * \param [in] par  A pointer to a \c func_param structure containing 
+ * \param [in] par  A pointer to a \c func_param structure containing
  *                  density required for computing internal energy.
  * \return f(T)
  *********************************************************************** */
 {
   double  T1, rho, mu;
   struct func_param *p = (struct func_param *) par;
-  
+
   T1   = p->T1;
   rho  = p->v[RHO];
-  GetMu(T, rho, &mu);  
+  GetMu(T, rho, &mu);
   return T - T1*mu;
 }
 #endif
-

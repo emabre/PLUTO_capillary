@@ -3,64 +3,64 @@
   \file
   \brief Advance equations using Corner Transport Upwind (CTU).
 
-  Implement the dimensionally unsplit, Corner Transport Upwind method 
+  Implement the dimensionally unsplit, Corner Transport Upwind method
   (CTU) of Colella. It consists of
- 
-  <b> A predictor step </b>: 
-  -# start from cell center values of \c V and compute time-centered 
+
+  <b> A predictor step </b>:
+  -# start from cell center values of \c V and compute time-centered
      interface states using either HANCOCK or CHARACTERISTIC_TRACING:
      \f[
        V^{n+\HALF}_{i,\pm} = V^n_{i,\pm} + \pd{V}{t}\frac{\Delta t}{2}
-     \f] 
+     \f]
      Store the resulting states by converting \f$ V_\pm \f$ in \f$ U_\pm \f$
      (= \c UP, \c UM).
      Normal (n) and trasnverse (t) indexes for this step should span
-     \f$ n \in [n_{\rm beg} - 1, n_{\rm end} + 1] \f$, 
-     \f$ t \in [t_{\rm beg} - 1, t_{\rm end} + 1] \f$ 
+     \f$ n \in [n_{\rm beg} - 1, n_{\rm end} + 1] \f$,
+     \f$ t \in [t_{\rm beg} - 1, t_{\rm end} + 1] \f$
      for cell-centered schemes and
-     \f$ n \in [n_{\rm beg} - 2, n_{\rm end} + 2] \f$,  
-     \f$ t \in [t_{\rm beg} - 2, t_{\rm end} + 2] \f$ for staggered MHD. 
-  -# Solve Riemann problems between \f$ V_{i,+}\f$ and \f$ V_{i+1,-}\f$  
+     \f$ n \in [n_{\rm beg} - 2, n_{\rm end} + 2] \f$,
+     \f$ t \in [t_{\rm beg} - 2, t_{\rm end} + 2] \f$ for staggered MHD.
+  -# Solve Riemann problems between \f$ V_{i,+}\f$ and \f$ V_{i+1,-}\f$
      and store the flux difference in RHS.
   -# Compute cell and time-centered values UH = U + dt/2*RHS with index
-     range \f$ n \in [n_{\rm beg}, n_{\rm end}]\f$, 
+     range \f$ n \in [n_{\rm beg}, n_{\rm end}]\f$,
            \f$ t \in [t_{\rm beg}, t_{\rm end}]\f$ for cell-centered schemes
-     and   \f$ n \in [n_{\rm beg}-1, n_{\rm end}+1]\f$, 
+     and   \f$ n \in [n_{\rm beg}-1, n_{\rm end}+1]\f$,
            \f$ t \in [t_{\rm beg}-1, t_{\rm end}+1]\f$ for staggered MHD.
-   
-  <b> A corrector step </b>: 
-  -# correct left and right states \c UP and \c UM computed in the previous 
+
+  <b> A corrector step </b>:
+  -# correct left and right states \c UP and \c UM computed in the previous
      step by adding the transverse RHS contribution, e.g.
      \f$ U^{n+\HALF}_{i\pm} += ({\cal RHS}^n_y + {\cal RHS}^n_z)\Delta t/2 \f$.
-     This step should cover \f$ [n_{\rm beg}-1, n_{\rm end} + 1]\f$, 
+     This step should cover \f$ [n_{\rm beg}-1, n_{\rm end} + 1]\f$,
      \f$ [t_{\rm beg}, t_{\rm end}]\f$ for cell-centered MHD and
-     \f$ [n_{\rm beg}-2, n_{\rm end} + 2]\f$, \f$ 
+     \f$ [n_{\rm beg}-2, n_{\rm end} + 2]\f$, \f$
      [t_{\rm beg}-1, tend+1]\f$ for staggered MHD.
- 
+
   -# Solve a normal Riemann problem with left and right states
      \c UP and \c UM, get RHS and evolve to final stage,
      \f$ U^{n+1} = U^n + \Delta t^n {\cal RHS}^{n+\HALF} \f$
-   
- 
-  This integrator performs an integration in the ghost boundary zones, 
-  in order to recover appropriate information to build the transverse 
+
+
+  This integrator performs an integration in the ghost boundary zones,
+  in order to recover appropriate information to build the transverse
   predictors.
- 
+
   \note If explicit parabolic flux have to be included, the predictor
         step is modified by computing the RHS from 1st order states at t^n.
-        This allows to obtain space and time centered states in one 
+        This allows to obtain space and time centered states in one
         row of boundary zones required during the following corrector step.
-  
+
   \b References
-     - "The Piecewise Parabolic Method for Multidimensional 
+     - "The Piecewise Parabolic Method for Multidimensional
         Relativistic Fluid Dynamics" \n
-       Mignone, A.; Plewa, T.; Bodo, G. ApJS (2005), 160..199M 
+       Mignone, A.; Plewa, T.; Bodo, G. ApJS (2005), 160..199M
      - "An unsplit Godunov method for ideal MHD via constrained transport" \n
         Gardiner & Stone, JCP (2005), 205, 509
      - "A second-order unsplit Godunov scheme for cell-centered MHD:
         the CTU-GLM scheme" \n
         Mignone & Tzeferacos  JCP (2010), 229, 2117
-  
+
   \authors A. Mignone (mignone@ph.unito.it)\n
            P. Tzeferacos (petros.tzeferacos@ph.unito.it)
   \date    June 24, 2015
@@ -85,7 +85,7 @@
                             double *, int, int, Grid *);
 #endif
 /* ********************************************************************* */
-int AdvanceStep (const Data *d, Riemann_Solver *Riemann, 
+int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
                  Time_Step *Dts, Grid *grid)
 /*!
  * Advance equations using the corner transport upwind method
@@ -95,7 +95,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
  * \param [in]    Riemann  pointer to a Riemann solver function
  * \param [in,out]    Dts  pointer to time step structure
  * \param [in]       grid  pointer to array of Grid structures
- *         
+ *
  *********************************************************************** */
 {
   int i, j,k, nv, *in;
@@ -103,14 +103,14 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   double dt2, inv_dtp, *inv_dl;
   Index indx;
   static unsigned char *flagm, *flagp;
-  static Data_Arr UM[DIMENSIONS], UP[DIMENSIONS];  
+  static Data_Arr UM[DIMENSIONS], UP[DIMENSIONS];
 
   static Data_Arr dU, UH, Bs0;
   static State_1D state;
   static double **dtdV, **dcoeff, ***T;
   double *dtdV2, **rhs;
   RBox *box = GetRBox(DOM, CENTER);
-  
+
 /* -----------------------------------------------------------------
                Check algorithm compatibilities
    ----------------------------------------------------------------- */
@@ -122,7 +122,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #endif
 
 /*  --------------------------------------------------------
-                   Allocate static memory areas   
+                   Allocate static memory areas
    --------------------------------------------------------- */
 
   if (dU == NULL){
@@ -139,18 +139,18 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
     #ifdef STAGGERED_MHD
      Bs0 = ARRAY_4D(DIMENSIONS, NX3_TOT, NX2_TOT, NX1_TOT, double);
     #endif
-    
+
   /* ---------------------------------------------------------
-      corner-coupled multidimensional arrays are stored into 
-      memory following the same conventions adopted when 
-      sweeping along the coordinate directions, i.e., 
+      corner-coupled multidimensional arrays are stored into
+      memory following the same conventions adopted when
+      sweeping along the coordinate directions, i.e.,
 
          (z,y,x)->(z,x,y)->(y,x,z).
 
-      This allows 1-D arrays to conveniently point at the 
+      This allows 1-D arrays to conveniently point at the
       fastest running indexes of the respective multi-D ones.
-     --------------------------------------------------------- */  
-     
+     --------------------------------------------------------- */
+
     UM[IDIR] = ARRAY_4D(NX3_TOT, NX2_TOT, NX1_TOT, NVAR, double);
     UP[IDIR] = ARRAY_4D(NX3_TOT, NX2_TOT, NX1_TOT, NVAR, double);
 
@@ -161,7 +161,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
      UM[KDIR] = ARRAY_4D(NX2_TOT, NX1_TOT, NX3_TOT, NVAR, double);
      UP[KDIR] = ARRAY_4D(NX2_TOT, NX1_TOT, NX3_TOT, NVAR, double);
     #endif
- 
+
     #if (PARABOLIC_FLUX & EXPLICIT)
      dcoeff = ARRAY_2D(NMAX_POINT, NVAR, double);
     #endif
@@ -176,7 +176,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 /*  memset (dU[0][0][0], 0.0, NX3_TOT*NX2_TOT*NX1_TOT*NVAR*sizeof(double));   */
 
   #ifdef FARGO
-   FARGO_SubtractVelocity (d,grid); 
+   FARGO_SubtractVelocity (d,grid);
   #endif
 
 /* -------------------------------------------------------
@@ -186,7 +186,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 
   g_intStage = 1;
   Boundary (d, ALL_DIR, grid);
-  #if (SHOCK_FLATTENING == MULTID) || (ENTROPY_SWITCH) 
+  #if (SHOCK_FLATTENING == MULTID) || (ENTROPY_SWITCH)
    FlagShock (d, grid);
   #endif
 
@@ -196,11 +196,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
     JTOT_LOOP(j) dtdV[JDIR][j] = dt2/grid[JDIR].dV[j]; ,
     KTOT_LOOP(k) dtdV[KDIR][k] = dt2/grid[KDIR].dV[k];
   )
-
+/*[Ema] I should generalize here, how the T is computed*/
   #if THERMAL_CONDUCTION == EXPLICIT
    TOT_LOOP(k,j,i) T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
   #endif
-  
+
 /* ------------------------------------------------
     Compute current arrays
    ------------------------------------------------ */
@@ -208,7 +208,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #if (RESISTIVITY == EXPLICIT) && (defined STAGGERED_MHD)
    GetCurrent (d, -1, grid);
   #endif
- 
+
 /* ----------------------------------------------------
     Convert primitive to conservative and reset arrays
    ---------------------------------------------------- */
@@ -228,10 +228,10 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
               memcpy(Bs0[BX3s][k][j], d->Vs[BX3s][k][j], nv);)
    }
   #endif
-  
+
 /* ----------------------------------------------------
      1. Compute Normal predictors and
-        solve normal Riemann problems. 
+        solve normal Riemann problems.
         Store computations in UP, UM, RHS (X,Y,Z)
    ---------------------------------------------------- */
 
@@ -242,19 +242,19 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
     #if (RESISTIVITY == EXPLICIT) && !(defined STAGGERED_MHD)
      GetCurrent(d, g_dir, grid);
     #endif
-    TRANSVERSE_LOOP(indx,in,i,j,k){  
+    TRANSVERSE_LOOP(indx,in,i,j,k){
 
       g_i = i; g_j = j; g_k = k;
 
     /* ---------------------------------------------
-        save computational time by having state.up 
-        and state.um pointing at the fastest 
-        running indexes of UP and UM. 
-        Also, during the x-sweep we initialize Uc 
-        and dU by changing the memory address of 
-        state.u and state.rhs. 
+        save computational time by having state.up
+        and state.um pointing at the fastest
+        running indexes of UP and UM.
+        Also, during the x-sweep we initialize Uc
+        and dU by changing the memory address of
+        state.u and state.rhs.
        --------------------------------------------- */
-        
+
       state.up = UP[g_dir][*(indx.pt2)][*(indx.pt1)]; state.uL = state.up;
       state.um = UM[g_dir][*(indx.pt2)][*(indx.pt1)]; state.uR = state.um + 1;
 
@@ -299,21 +299,21 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
         0    X     0        0    X     0
          +--------+          +--------+
          |        |          |        |
-        0|   X    |0   -->  Y|   XY   |Y  
+        0|   X    |0   -->  Y|   XY   |Y
          |        |          |        |
          +--------+          +--------+
         0    X     0        0    X     0
 
          (X sweep)           (Y sweep)
 
-       Also, evolve cell center values by dt/2. 
+       Also, evolve cell center values by dt/2.
        For staggered mhd, this step should be carried also in one rows of
        boundary zones in order to provide the cell  and time centered
        e.m.f.
       ------------------------------------------------------------------ */
 
       if (g_dir == IDIR){
-          
+
         for (nv = NVAR; nv--; ) {
           state.rhs[indx.beg - 1][nv] = 0.0;
           state.rhs[indx.end + 1][nv] = 0.0;
@@ -336,26 +336,26 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
         }}
       }
 
-#else 
+#else
 
    /* -------------------------------------------------------------
-       When parabolic terms have to be included explicitly, we use 
-       a slightly different formulation where the transverse 
-       predictors are computed using 1st order states. 
-       This still yields a second-order accurate scheme but allow 
-       to compute the solution at the half time step in one rows 
-       of ghost zones, which is essential to update the parabolic 
+       When parabolic terms have to be included explicitly, we use
+       a slightly different formulation where the transverse
+       predictors are computed using 1st order states.
+       This still yields a second-order accurate scheme but allow
+       to compute the solution at the half time step in one rows
+       of ghost zones, which is essential to update the parabolic
        terms using midpoint rule:
 
-            U^{n+1} = U^n - RHS(hyp, n+1/2) - RHS(par, n+1/2) 
-      
-           
+            U^{n+1} = U^n - RHS(hyp, n+1/2) - RHS(par, n+1/2)
+
+
        Since RHS(par) has a stencil 3-point wide.
-       Corner coupled states are modified to account for parabolic 
+       Corner coupled states are modified to account for parabolic
        terms in the following way:
 
-            U^{n+1/2}_\pm = U^_\pm - RX,h + (RX,h + RY,h + RZ,h) 
-                                          + (RX,p + RY,p + RZ,p) 
+            U^{n+1/2}_\pm = U^_\pm - RX,h + (RX,h + RY,h + RZ,h)
+                                          + (RX,p + RY,p + RZ,p)
       -------------------------------------------------------------- */
 
       for ((*in) = 0; (*in) < indx.ntot; (*in)++) {
@@ -369,7 +369,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       #endif
       PrimToCons(state.vm, state.um, 0, indx.ntot-1);
       PrimToCons(state.vp, state.up, 0, indx.ntot-1);
-      
+
       Riemann (&state, indx.beg-1, indx.end, Dts->cmax, grid);
       #ifdef STAGGERED_MHD
        CT_StoreEMF (&state, indx.beg-1, indx.end, grid);
@@ -387,7 +387,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       ParabolicFlux (d->Vc, d->J, T, &state, dcoeff, indx.beg-1, indx.end, grid);
 
   /* ----------------------------------------------------------------
-      compute LR states and subtract normal (hyperbolic) 
+      compute LR states and subtract normal (hyperbolic)
       rhs contribution.
       NOTE: states are computed from IBEG - 1 (= indx.beg) up to
             IEND + 1 (= indx.end) since EMF has already been evaluated
@@ -434,17 +434,17 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   } /* -- end loop on dimensions -- */
 
 /* -------------------------------------------------------
-     2a. Advance staggered magnetic fields by dt/2 
+     2a. Advance staggered magnetic fields by dt/2
    ------------------------------------------------------- */
 
-  #ifdef STAGGERED_MHD     
+  #ifdef STAGGERED_MHD
    CT_Update (d, d->Vs, 0.5*g_dt, grid);
    CT_AverageMagneticField (d->Vs, UH, grid);
   #endif
 
 /* ----------------------------------------------------------
-     2b. Convert cell and time centered values to primitive. 
-         UH is transformed from conservative to primitive 
+     2b. Convert cell and time centered values to primitive.
+         UH is transformed from conservative to primitive
          variables for efficiency purposes.
    ---------------------------------------------------------- */
 
@@ -457,6 +457,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       VAR_LOOP(nv) d->Vc[nv][k][j][i] = state.v[*in][nv];
     }
     #if THERMAL_CONDUCTION == EXPLICIT
+    /*[Ema] Here I should generalize computation of T*/
      for ((*in) = indx.beg; (*in) <= indx.end; (*in)++){
        T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
      }
@@ -465,8 +466,8 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #if (RESISTIVITY == EXPLICIT) && (defined STAGGERED_MHD)
    GetCurrent (d, -1, grid);
   #endif
-  
-/* ---------------------------------------------------- 
+
+/* ----------------------------------------------------
      3. Final conservative update
    ---------------------------------------------------- */
 
@@ -478,17 +479,17 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
     #if (RESISTIVITY == EXPLICIT) && !(defined STAGGERED_MHD)
      GetCurrent(d, g_dir, grid);
     #endif
-    TRANSVERSE_LOOP(indx,in,i,j,k){  
+    TRANSVERSE_LOOP(indx,in,i,j,k){
 
       g_i = i;  g_j = j;  g_k = k;
 
     /* ---------------------------------------------------------
-        Convert conservative corner-coupled states to primitive 
+        Convert conservative corner-coupled states to primitive
        --------------------------------------------------------- */
-       
+
       state.up = UP[g_dir][*(indx.pt2)][*(indx.pt1)]; state.uL = state.up;
       state.um = UM[g_dir][*(indx.pt2)][*(indx.pt1)]; state.uR = state.um + 1;
-      
+
       for ((*in) = indx.beg-1; (*in) <= indx.end+1; (*in)++){
         for (nv = NVAR; nv--; ){
           state.up[*in][nv] += dU[k][j][i][nv];
@@ -498,9 +499,9 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       }
 
     /* -------------------------------------------------------
-        compute time centered, cell centered state. 
-        Useful for source terms like gravity, 
-        curvilinear terms and Powell's 8wave 
+        compute time centered, cell centered state.
+        Useful for source terms like gravity,
+        curvilinear terms and Powell's 8wave
        ------------------------------------------------------- */
 
       for ((*in) = indx.beg-1; (*in) <= indx.end+1; (*in)++) {
@@ -546,11 +547,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       #endif
       #if (PARABOLIC_FLUX & EXPLICIT)
 
-     /* -------------------------------------------------------- 
-         since integration in the transverse directions extends 
-         one point below and one point above the computational 
-         box (when using CT), we avoid computing parabolic 
-         operators in one row of boundary zones below and above 
+     /* --------------------------------------------------------
+         since integration in the transverse directions extends
+         one point below and one point above the computational
+         box (when using CT), we avoid computing parabolic
+         operators in one row of boundary zones below and above
          since the 3-point wide stencil may not be available.
         -------------------------------------------------------- */
 
@@ -593,7 +594,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 
       for ((*in) = indx.beg; (*in) <= indx.end; (*in)++) {
         NVAR_LOOP(nv) d->Uc[k][j][i][nv] += state.rhs[*in][nv];
-      }           
+      }
     }
   }
 
@@ -607,17 +608,17 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #endif
 
 /* ----------------------------------------------
-           convert to primitive 
+           convert to primitive
    ---------------------------------------------- */
 
   #ifdef FARGO
    FARGO_ShiftSolution (d->Uc, d->Vs, grid);
-  #endif 
+  #endif
 
   ConsToPrim3D(d->Uc, d->Vc, d->flag, box);
 
   #ifdef FARGO
-   FARGO_AddVelocity (d,grid); 
+   FARGO_AddVelocity (d,grid);
   #endif
 
   return(0); /* -- step has been achieved, return success -- */
@@ -628,20 +629,20 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 void CTU_CT_Source (double **v, double **up, double **um,
                     double *dtdV, int beg, int end, Grid *grid)
 /*!
- * Add source terms to conservative left and right states obtained from 
+ * Add source terms to conservative left and right states obtained from
  * the primitive form  of the equations. The source terms are:
  *
  * - m  += dt/2 *  B  * dbx/dx
  * - Bt += dt/2 * vt  * dbx/dx   (t = transverse component)
  * - E  += dt/2 * v*B * dbx/dx
  *
- * These terms are NOT accounted for when the primitive form of the 
- * equations is used (see Gardiner & Stone JCP (2005), Crockett et al. 
- * JCP(2005)). This is true for both the Charactheristic Tracing AND the 
- * primitive Hancock scheme when the constrained transport is used, since 
- * the  resulting system is 7x7. To better understand this, you can 
- * consider the stationary solution rho = p = 1, v = 0  and Bx = x, 
- * By = -y. If these terms were not included the code would generate 
+ * These terms are NOT accounted for when the primitive form of the
+ * equations is used (see Gardiner & Stone JCP (2005), Crockett et al.
+ * JCP(2005)). This is true for both the Charactheristic Tracing AND the
+ * primitive Hancock scheme when the constrained transport is used, since
+ * the  resulting system is 7x7. To better understand this, you can
+ * consider the stationary solution rho = p = 1, v = 0  and Bx = x,
+ * By = -y. If these terms were not included the code would generate
  * spurious velocities.
  *
  *********************************************************************** */
@@ -658,7 +659,7 @@ void CTU_CT_Source (double **v, double **up, double **um,
 
   #if GEOMETRY == CARTESIAN
    for (i = beg; i <= end; i++){
-     db[i] = dtdV[i]*(up[i][BXn] - um[i][BXn]); 
+     db[i] = dtdV[i]*(up[i][BXn] - um[i][BXn]);
    }
   #elif GEOMETRY == CYLINDRICAL
    if (g_dir == IDIR){
@@ -668,7 +669,7 @@ void CTU_CT_Source (double **v, double **up, double **um,
      }
    }else{
      for (i = beg; i <= end; i++){
-       db[i] = dtdV[i]*(up[i][BXn] - um[i][BXn]); 
+       db[i] = dtdV[i]*(up[i][BXn] - um[i][BXn]);
      }
    }
   #else
@@ -686,17 +687,17 @@ void CTU_CT_Source (double **v, double **up, double **um,
             up[i][MX2] += v[i][BX2]*db[i];
             um[i][MX2] += v[i][BX2]*db[i];   ,
             up[i][MX3] += v[i][BX3]*db[i];
-            um[i][MX3] += v[i][BX3]*db[i]; ) 
+            um[i][MX3] += v[i][BX3]*db[i]; )
 
     EXPAND(                            ;   ,
-            up[i][BXt] += v[i][VXt]*db[i]; 
+            up[i][BXt] += v[i][VXt]*db[i];
             um[i][BXt] += v[i][VXt]*db[i];   ,
-            up[i][BXb] += v[i][VXb]*db[i]; 
+            up[i][BXb] += v[i][VXb]*db[i];
             um[i][BXb] += v[i][VXb]*db[i];)
 
-    #if HAVE_ENERGY 
-     scrh = EXPAND(   v[i][VX1]*v[i][BX1]  , 
-                    + v[i][VX2]*v[i][BX2]  , 
+    #if HAVE_ENERGY
+     scrh = EXPAND(   v[i][VX1]*v[i][BX1]  ,
+                    + v[i][VX2]*v[i][BX2]  ,
                     + v[i][VX3]*v[i][BX3]);
      up[i][ENG] += scrh*db[i];
      um[i][ENG] += scrh*db[i];

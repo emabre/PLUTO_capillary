@@ -3,26 +3,26 @@
   \file
   \brief   Single stage integration for RK time stepping.
 
-  Advance the equations in conservative form by taking a single stage 
-  in the form 
+  Advance the equations in conservative form by taking a single stage
+  in the form
   \f[
       U \quad\Longrightarrow \quad  U + \Delta t R(V)
   \f]
   where \c U is a 3D array of conservative variables, \c V is a 3D array
-  of primitive variables, \c R(V) is the right hand side containing 
+  of primitive variables, \c R(V) is the right hand side containing
   flux differences and source terms.
-  Note that \c U and \c V may \e not necessarily be the map of 
+  Note that \c U and \c V may \e not necessarily be the map of
   each other, i.e., \c U is \e not \c U(V).
-  The right hand side can contain contributions from 
-   
-    - the direction set by the global variable ::g_dir, 
+  The right hand side can contain contributions from
+
+    - the direction set by the global variable ::g_dir,
       when DIMENSIONAL_SPLITTING == YES;
     - all directions when DIMENSIONAL_SPLITTING == NO;
-   
-  When the integrator stage is the first one (predictor), this function 
-  also computes the maximum of inverse time steps for hyperbolic and 
+
+  When the integrator stage is the first one (predictor), this function
+  also computes the maximum of inverse time steps for hyperbolic and
   parabolic terms (if the latters are included explicitly).
-  
+
   \authors A. Mignone (mignone@ph.unito.it)\n
            C. Zanni   (zanni@oato.inaf.it)\n
            P. Tzeferacos (petros.tzeferacos@ph.unito.it)
@@ -36,14 +36,14 @@ static intList TimeStepIndexList();
 
 /* ********************************************************************* */
 void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
-                 Riemann_Solver *Riemann, double dt, Time_Step *Dts, 
+                 Riemann_Solver *Riemann, double dt, Time_Step *Dts,
                  Grid *grid)
 /*!
- * 
+ *
  * \param [in,out]  d        pointer to PLUTO Data structure
  * \param [in,out]  UU       data array containing conservative variables
  *                           at the previous time step to be updated
- * \param [out]     aflux    interface fluxes needed for refluxing operations 
+ * \param [out]     aflux    interface fluxes needed for refluxing operations
  *                           (only with AMR)
  * \param [in]      Riemann  pointer to a Riemann solver function
  * \param [in]      dt       the time step for the current update step
@@ -84,7 +84,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
    2. Reset arrays.
       C_dt is an array used to store the inverse time step for
       advection and diffusion.
-      We use C_dt[RHO] for advection, 
+      We use C_dt[RHO] for advection,
              C_dt[MX1] for viscosity,
              C_dt[BX1...BX3] for resistivity and
              C_dt[ENG] for thermal conduction.
@@ -105,7 +105,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
   #endif
 
 /* ------------------------------------------------
-   2a. Compute current arrays 
+   2a. Compute current arrays
    ------------------------------------------------ */
 
   #if (RESISTIVITY == EXPLICIT) && (defined STAGGERED_MHD)
@@ -118,6 +118,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
   #if THERMAL_CONDUCTION == EXPLICIT
    if (T == NULL) T = ARRAY_3D(NX3_MAX, NX2_MAX, NX1_MAX, double);
+   /*[Ema] Here I should generalize computation of T*/
    TOT_LOOP(k,j,i) T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
   #endif
 
@@ -127,7 +128,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
   for (dir = beg_dir; dir <= end_dir; dir++){
 
-    g_dir = dir;  
+    g_dir = dir;
     SetIndexes (&indx, grid);  /* -- set normal and transverse indices -- */
     ResetState (d, &state, grid);
 
@@ -145,7 +146,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
         #endif
       }
       CheckNaN (state.v, 0, indx.ntot-1,0);
-      States  (&state, indx.beg - 1, indx.end + 1, grid); 
+      States  (&state, indx.beg - 1, indx.end + 1, grid);
       Riemann (&state, indx.beg - 1, indx.end, Dts->cmax, grid);
       #ifdef STAGGERED_MHD
        CT_StoreEMF (&state, indx.beg - 1, indx.end, grid);
@@ -164,12 +165,12 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
     /* -- update:  U = U + dt*R -- */
 
       #ifdef CHOMBO
-       for ((*ip) = indx.beg; (*ip) <= indx.end; (*ip)++) { 
+       for ((*ip) = indx.beg; (*ip) <= indx.end; (*ip)++) {
          VAR_LOOP(nv) UU[nv][k][j][i] += state.rhs[*ip][nv];
        }
        SaveAMRFluxes (&state, aflux, indx.beg-1, indx.end, grid);
       #else
-       for ((*ip) = indx.beg; (*ip) <= indx.end; (*ip)++) { 
+       for ((*ip) = indx.beg; (*ip) <= indx.end; (*ip)++) {
          VAR_LOOP(nv) UU[k][j][i][nv] += state.rhs[*ip][nv];
        }
       #endif
@@ -179,16 +180,16 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
     /* -- compute inverse dt coefficients when g_intStage = 1 -- */
 
       inv_dl = GetInverse_dl(grid);
-      for ((*ip) = indx.beg; (*ip) <= indx.end; (*ip)++) { 
+      for ((*ip) = indx.beg; (*ip) <= indx.end; (*ip)++) {
         #if DIMENSIONAL_SPLITTING == NO
 
          #if !GET_MAX_DT
-          C_dt[0][k][j][i] += 0.5*(  Dts->cmax[(*ip)-1] 
+          C_dt[0][k][j][i] += 0.5*(  Dts->cmax[(*ip)-1]
                                    + Dts->cmax[*ip])*inv_dl[*ip];
          #endif
          #if (PARABOLIC_FLUX & EXPLICIT)
           dl2 = 0.5*inv_dl[*ip]*inv_dl[*ip];
-          FOR_EACH(nv, 1, (&cdt_list)) {  
+          FOR_EACH(nv, 1, (&cdt_list)) {
             C_dt[nv][k][j][i] += (dcoeff[*ip][nv]+dcoeff[(*ip)-1][nv])*dl2;
           }
          #endif
@@ -204,7 +205,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
             Dts->inv_dtp = MAX(Dts->inv_dtp, dcoeff[*ip][nv]*dl2);
           }
          #endif
-        #endif 
+        #endif
       }
     }
   }
@@ -242,7 +243,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
        Dts->inv_dta = MAX(Dts->inv_dta, C_dt[0][k][j][i]);
       #endif
       #if (PARABOLIC_FLUX & EXPLICIT)
-       FOR_EACH(nv, 1, (&cdt_list)) { 
+       FOR_EACH(nv, 1, (&cdt_list)) {
          Dts->inv_dtp = MAX(Dts->inv_dtp, C_dt[nv][k][j][i]);
        }
       #endif
@@ -259,9 +260,9 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
 #ifdef CHOMBO
 /* ********************************************************************* */
-void SaveAMRFluxes (const State_1D *state, double **aflux, 
+void SaveAMRFluxes (const State_1D *state, double **aflux,
                     int beg, int end,  Grid *grid)
-/*! 
+/*!
  *  Rebuild fluxes in a way suitable for AMR operation
  *  by adding pressure and multiplying by area.
  *
@@ -291,7 +292,7 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
     for (i = beg; i <= end; i++) {
      NVAR_LOOP(nv) state->flux[i][nv] *= g_x2stretch;
     }
-  }  
+  }
   #endif
 #endif
 
@@ -320,7 +321,7 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
     #if CH_SPACEDIM == 3
     area *= g_x3stretch;
     #endif
-  #endif 
+  #endif
     for (i = beg; i <= end; i++) {
       NVAR_LOOP(nv) {
         state->flux[i][nv] *= grid[IDIR].A[i];
@@ -375,7 +376,7 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
         state->flux[i][nv] *= g_x2stretch;
         #endif
         #if CH_SPACEDIM == 3
-        state->flux[i][nv] *= g_x3stretch; 
+        state->flux[i][nv] *= g_x3stretch;
         #endif
       }
       #if (COMPONENTS > 1) && CHOMBO_CONS_AM
@@ -390,7 +391,7 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
     #endif
     #if CH_SPACEDIM == 3
     area *= g_x3stretch;
-    #endif 
+    #endif
     if (area != 1.) {
       for (i = beg; i <= end; i++) {
         NVAR_LOOP(nv) {
@@ -417,7 +418,7 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
     }
   }
 #endif
-  
+
 /* -- store fluxes for re-fluxing operation -- */
 
   nxf = grid[IDIR].np_int + (g_dir == IDIR);
@@ -428,17 +429,17 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
   nyb = grid[JDIR].lbeg - (g_dir == JDIR);
   nzb = grid[KDIR].lbeg - (g_dir == KDIR);
 
-#if TIME_STEPPING == RK2 
+#if TIME_STEPPING == RK2
   wflux = 0.5;
 #else
   wflux = 1.0;
 #endif
- 
+
   i = g_i; j = g_j; k = g_k;
   if (g_dir == IDIR) in = &i;
   if (g_dir == JDIR) in = &j;
   if (g_dir == KDIR) in = &k;
-  
+
   for ((*in) = beg; (*in) <= end; (*in)++) {
     #if HAVE_ENERGY && ENTROPY_SWITCH
      state->flux[*in][ENTR] = 0.0;
@@ -448,7 +449,7 @@ void SaveAMRFluxes (const State_1D *state, double **aflux,
       aflux[g_dir][indf] = wflux*state->flux[(*in)][nv];
     }
   }
- 
+
 }
 #endif
 
@@ -461,7 +462,7 @@ intList TimeStepIndexList()
 {
   int i = 0;
   intList cdt;
-  
+
   cdt.indx[i++] = RHO;
   #if VISCOSITY == EXPLICIT
    cdt.indx[i++] = MX1;
@@ -475,6 +476,6 @@ intList TimeStepIndexList()
    cdt.indx[i++] = ENG;
   #endif
   cdt.nvar = i;
-  
+
   return cdt;
 }

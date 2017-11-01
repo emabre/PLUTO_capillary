@@ -118,7 +118,7 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
   #if THERMAL_CONDUCTION == EXPLICIT
    if (T == NULL) T = ARRAY_3D(NX3_MAX, NX2_MAX, NX1_MAX, double);
-   /*[Ema] Here I should generalize computation of T*/
+   /*[Ema]Temp: Here I should generalize computation of T*/
    TOT_LOOP(k,j,i) T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
   #endif
 

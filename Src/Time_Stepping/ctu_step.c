@@ -196,7 +196,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
     JTOT_LOOP(j) dtdV[JDIR][j] = dt2/grid[JDIR].dV[j]; ,
     KTOT_LOOP(k) dtdV[KDIR][k] = dt2/grid[KDIR].dV[k];
   )
-/*[Ema] I should generalize here, how the T is computed*/
+/*[Ema]Temp: I should generalize here, how the T is computed*/
   #if THERMAL_CONDUCTION == EXPLICIT
    TOT_LOOP(k,j,i) T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
   #endif
@@ -457,7 +457,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       VAR_LOOP(nv) d->Vc[nv][k][j][i] = state.v[*in][nv];
     }
     #if THERMAL_CONDUCTION == EXPLICIT
-    /*[Ema] Here I should generalize computation of T*/
+    /*[Ema]Temp: Here I should generalize computation of T*/
      for ((*in) = indx.beg; (*in) <= indx.end; (*in)++){
        T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
      }

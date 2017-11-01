@@ -103,8 +103,7 @@ double ParabolicRHS (const Data *d, Data_Arr dU, double dt, Grid *grid)
 /* ------------------------------------------------
     compute the temperature array if TC is needed
    ------------------------------------------------ */
-/*[Ema] here the Temperature is computed, I should generalize for PVTE_LAW*/
-/*[Ema] I should also generalize the computation of T inside ParabolicFlux()*/
+/*[Ema]Temp: here the Temperature is computed, I should generalize for PVTE_LAW*/
   #if ADD_TC
    TOT_LOOP(k,j,i) T[k][j][i] = V[PRS][k][j][i]/V[RHO][k][j][i];
    vh     = state.vh;

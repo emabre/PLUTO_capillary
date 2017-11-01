@@ -1,7 +1,7 @@
 # *********************************************************
-#                                                     
-#                  PLUTO 4.2  Makefile  
-#                                                     
+#
+#                  PLUTO 4.2  Makefile
+#										modified by Ema(added gamma_transp.o to OBJ)
 # *********************************************************
 
 pluto:                              # Default target
@@ -15,7 +15,7 @@ VPATH        = ./:$(SRC)/New:$(SRC):$(SRC)/Time_Stepping:$(SRC)/States
 include $(PLUTO_DIR)/Config/$(ARCH)
 
 # ---------------------------------------------------------
-#         Set headers and object files 
+#         Set headers and object files
 # ---------------------------------------------------------
 
 HEADERS = pluto.h prototypes.h structs.h definitions.h macros.h mod_defs.h plm_coeffs.h
@@ -26,19 +26,19 @@ OBJ = adv_flux.o arrays.o boundary.o check_states.o  \
       mappers3D.o mean_mol_weight.o \
       parse_file.o plm_coeffs.o rbox.o \
       set_indexes.o set_geometry.o set_output.o \
-      tools.o var_names.o  
+      tools.o var_names.o gamma_transp.o
 
 OBJ += bin_io.o colortable.o initialize.o jet_domain.o \
        main.o restart.o runtime_setup.o show_config.o  \
        set_image.o set_grid.o startup.o split_source.o \
        userdef_output.o write_data.o write_tab.o \
-       write_img.o write_vtk.o 
+       write_img.o write_vtk.o
 
 include $(SRC)/Math_Tools/makefile
 
 # ---------------------------------------------------------
 #  Define macros by adding -D<name> where <name> has been
-#  set to TRUE in the system configuration file (.defs) 
+#  set to TRUE in the system configuration file (.defs)
 # ---------------------------------------------------------
 
 ifeq ($(strip $(PARALLEL)), TRUE)
@@ -53,7 +53,7 @@ ifeq ($(strip $(USE_HDF5)), TRUE)
  CFLAGS += -DUSE_HDF5
  OBJ    += hdf5_io.o
 endif
-      
+
 ifeq ($($strip $(USE_PNG)), TRUE)
  CFLAGS += -DUSE_PNG
 endif
@@ -74,7 +74,7 @@ endif
 #    PLUTO target rule
 # ---------------------------------------------------------
 
-pluto: $(OBJ) 
+pluto: $(OBJ)
 	$(CC) $(OBJ) $(LDFLAGS) -o $@
 
 # ---------------------------------------------------------
@@ -93,4 +93,3 @@ clean:
 # ---------------------------------------------------------
 
 $(OBJ):  $(HEADERS)
-

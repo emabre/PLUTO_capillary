@@ -18,7 +18,7 @@ double ***ArrayMap (int, int, int, double *);
 unsigned char ***ArrayCharMap (int, int, int, unsigned char *);
 
 void BodyForceVectorGet (double **v, double **g,
-                         double *, double *, double *, int beg, int end, 
+                         double *, double *, double *, int beg, int end,
                          Grid *grid);
 void BodyForcePotentialGet (double **v, double **gphi,
                             double *phi_p, double *phi_c,
@@ -53,7 +53,7 @@ void FreeArrayMap (double ***);
 
 void FreeArrayCharMap(unsigned char ***);
 
-#ifdef FINITE_DIFFERENCE  
+#ifdef FINITE_DIFFERENCE
  Riemann_Solver FD_Flux;
  Reconstruct MP5_Reconstruct, PPM_Reconstruct, LIMO3_Reconstruct,
              WENOZ_Reconstruct, WENO3_Reconstruct;
@@ -107,7 +107,7 @@ char  *ParamFileGet     (const char *, int );
 int    ParamExist       (const char *);
 int    ParamFileHasBoth (const char *, const char *);
 
-void   PrimToChar (double **, double *, double *); 
+void   PrimToChar (double **, double *, double *);
 void   PrimToCons3D(Data_Arr, Data_Arr, RBox *);
 
 void ReadBinaryArray (void *, size_t, int, FILE *, int, int);
@@ -147,12 +147,12 @@ void STS (const Data *d, Time_Step *, Grid *);
 
 void Startup (Data *, Grid *);
 void States (const State_1D *, int, int, Grid *);
-void SwapEndian (void *, const int); 
+void SwapEndian (void *, const int);
 
 void UnsetJetDomain (const Data *, int, Grid *);
-void UpdateStage(const Data *, Data_Arr, double **, Riemann_Solver *,
+void UpdateStage(Data *, Data_Arr, double **, Riemann_Solver *,
                  double, Time_Step *, Grid *);
-void UserDefBoundary (const Data *, RBox *, int,  Grid *); 
+void UserDefBoundary (const Data *, RBox *, int,  Grid *);
 
 void VectorPotentialDiff (double *, int, int, int, Grid *);
 
@@ -199,10 +199,10 @@ void Async_BegWriteData (const Data *d, Output *output, Grid *grid);
 #endif
 
 
-/* --------------------------------------------------------------------- 
+/* ---------------------------------------------------------------------
           Prototype for cooling functions
    --------------------------------------------------------------------- */
-   
+
 #if COOLING != NO
  void Numerical_Jacobian (double *v, double **J);
  void Jacobian (double *v, double *rhs, double **dfdy);
@@ -227,7 +227,7 @@ double SolveODE_RKF12 (double *, double *, double *, double, double);
 #endif
 
 /* ----------------------------------------------
-           functions in tools.c 
+           functions in tools.c
    ---------------------------------------------- */
 
 void PlutoError (int, char *);
@@ -237,7 +237,7 @@ double Length_2 (int i, int j, int k, Grid *);
 double Length_3 (int i, int j, int k, Grid *);
 
 #if UPDATE_VECTOR_POTENTIAL == YES
- void VectorPotentialUpdate (const Data *d, const void *vp, 
+ void VectorPotentialUpdate (const Data *d, const void *vp,
                              const State_1D *state, const Grid *grid);
 #endif
 
@@ -252,5 +252,3 @@ double GetEntropy (double x);
 /* --- New stuffs -- */
 
 void   WriteAsciiFile (char *fname, double *q, int nvar);
-
-

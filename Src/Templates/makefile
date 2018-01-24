@@ -26,7 +26,7 @@ OBJ = adv_flux.o arrays.o boundary.o check_states.o  \
       mappers3D.o mean_mol_weight.o \
       parse_file.o plm_coeffs.o rbox.o \
       set_indexes.o set_geometry.o set_output.o \
-      tools.o var_names.o gamma_transp.o
+      tools.o var_names.o
 
 OBJ += bin_io.o colortable.o initialize.o jet_domain.o \
        main.o restart.o runtime_setup.o show_config.o  \

@@ -3,6 +3,7 @@
 ## Come è fatto l'avanzamento delle parti paraboliche
 `parabolic_rhs.c / parabolicRHS()`: cacola il membro destro per algoritmi "split" (STS, RKC)
 `parabolic_flux.c / parabolicFlux()` : calcola il "flusso" parabolico per algoritmo esplicito
+Notare che sia `parabolicRHS()` sia  `parabolicFlux()` chiamano `ViscousFlux(..)`, `TC_Flux(..)`, `ResistiveFlux(..)` (ma ovviamente usano i risultati in modo diverso!)
 
 ## Come è fatto il ciclo principale di avanzamento delle equazioni
 Dentro `main.c` si chiama `Integrate(..)`.
@@ -41,7 +42,8 @@ Cosa fa:
 ### SplitSource()
 Considera radiative losses (qui li trascuro) e termini *parabolici*:
 + chiama `STS(..)` o `RKC(..)`
-  - Avanza alcune equazioni con Super-Time-Stepping a seconda di quali contributi paracolici sono definiti.
+  - chiama `ParabolicRHS(..)` (la quale usa : `ViscousFlux(..)`, `TC_Flux(..)` e `ResistiveFlux(..)`)
+  - Avanza alcune equazioni con Super-Time-Stepping a seconda di quali contributi parabolici sono definiti.
   `VISCOSITY` -> eq. momento, eq. energia
   `RESISTIVITY` ->  eq. induzione, eq. energia
   `THERMAL_CONDUCTION` -> eq. energia

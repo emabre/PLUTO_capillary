@@ -196,9 +196,21 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
     JTOT_LOOP(j) dtdV[JDIR][j] = dt2/grid[JDIR].dV[j]; ,
     KTOT_LOOP(k) dtdV[KDIR][k] = dt2/grid[KDIR].dV[k];
   )
-/*[Ema]Temp: I should generalize here, how the T is computed*/
+/*[Ema]Temp: I generalized here, how the T is computed*/
   #if THERMAL_CONDUCTION == EXPLICIT
-   TOT_LOOP(k,j,i) T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
+    TOT_LOOP(k,j,i) {
+      #if EOS==IDEAL
+        T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
+      #elif EOS==PVTE_LAW
+        for (nv=NVAR; nv--;) v[nv] = d->Vc[nv][k][j][i];
+        if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
+          print1("AdvanceStep:[Ema] Error computing temperature!");
+        }
+        T[k][j][i] = T[k][j][i] / KELVIN;
+      #else
+        print1("AdvanceStep:[Ema] Error computing temperature, this EOS not implemented!")
+      #endif
+    }
   #endif
 
 /* ------------------------------------------------
@@ -457,9 +469,19 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
       VAR_LOOP(nv) d->Vc[nv][k][j][i] = state.v[*in][nv];
     }
     #if THERMAL_CONDUCTION == EXPLICIT
-    /*[Ema]Temp: Here I should generalize computation of T*/
+    /*[Ema]Temp: Here I generalized computation of T*/
      for ((*in) = indx.beg; (*in) <= indx.end; (*in)++){
-       T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
+       #if EOS==IDEAL
+         T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
+       #elif EOS==PVTE_LAW
+         for (nv=NVAR; nv--;) v[nv] = d->Vc[nv][k][j][i];
+         if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
+           print1("AdvanceStep:[Ema] Error computing temperature!");
+         }
+         T[k][j][i] = T[k][j][i] / KELVIN;
+       #else
+         print1("AdvanceStep:[Ema] Error computing temperature, this EOS not implemented!")
+       #endif
      }
     #endif
   }

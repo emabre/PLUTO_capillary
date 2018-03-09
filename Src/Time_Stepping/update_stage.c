@@ -118,8 +118,20 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
   #if THERMAL_CONDUCTION == EXPLICIT
    if (T == NULL) T = ARRAY_3D(NX3_MAX, NX2_MAX, NX1_MAX, double);
-   /*[Ema]Temp: Here I should generalize computation of T*/
-   TOT_LOOP(k,j,i) T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
+   /*[Ema]Temp: Here I generalized computation of T*/
+   TOT_LOOP(k,j,i) {
+     #if EOS==IDEAL
+       T[k][j][i] = d->Vc[PRS][k][j][i]/d->Vc[RHO][k][j][i];
+     #elif EOS==PVTE_LAW
+       for (nv=NVAR; nv--;) v[nv] = d->Vc[nv][k][j][i];
+       if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
+         print1("UpdateStage:[Ema] Error computing temperature!");
+       }
+       T[k][j][i] = T[k][j][i] / KELVIN;
+     #else
+       print1("UpdateStage:[Ema] Error computing temperature, this EOS not implemented!")
+     #endif
+   }
   #endif
 
 /* ----------------------------------------------------------------

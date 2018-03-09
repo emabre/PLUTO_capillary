@@ -15,7 +15,7 @@ e
 
 __Attenzione__:
 (i) Non caso non si stia usando l'agoritmo STS, nè RKC, nè cooling, `SplitSource(..)` non fa alcunchè!
-(ii) Non confondere *operator-split* con *dimensional-splitting*: il primo si riferisce alla separazione degli operatori, il secondo degli addendi dati dalle diverse dimensioni spaziali.
+(ii) Non confondere *operator-split* con *dimensional-splitting*: il primo si riferisce alla separazione degli operatori, il secondo (che è un caso particolare del primo) degli addendi dati dalle diverse dimensioni spaziali.
 
 ### Advance step
 Essenzialemente, nel caso di metodi RKx,

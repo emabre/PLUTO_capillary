@@ -73,6 +73,8 @@ double ParabolicRHS (const Data *d, Data_Arr dU, double dt, Grid *grid)
   static State_1D state;
   double max_inv_dtp[3],inv_dtp;
 
+  double v[NVAR]; /*[Ema] I hope that NVAR as dimension is fine!*/
+
   i = j = k = 0;
 
   if (C_dtp == NULL) {
@@ -103,11 +105,23 @@ double ParabolicRHS (const Data *d, Data_Arr dU, double dt, Grid *grid)
 /* ------------------------------------------------
     compute the temperature array if TC is needed
    ------------------------------------------------ */
-/*[Ema]Temp: here the Temperature is computed, I should generalize for PVTE_LAW*/
+/*[Ema]Temp: here the Temperature is computed, I generalized for PVTE_LAW*/
   #if ADD_TC
-   TOT_LOOP(k,j,i) T[k][j][i] = V[PRS][k][j][i]/V[RHO][k][j][i];
-   vh     = state.vh;
-   tc_flx = state.tc_flux;
+    #if EOS==IDEAL
+      TOT_LOOP(k,j,i) T[k][j][i] = V[PRS][k][j][i]/V[RHO][k][j][i];
+    #elif EOS==PVTE_LAW
+      TOT_LOOP(k,j,i) {
+        for (nv=NVAR; nv--;) v[nv] = V[nv][k][j][i];
+        if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
+          print1("ParabolicRHS:[Ema] Error computing temperature!");
+        }
+        T[k][j][i] = T[k][j][i] / KELVIN;
+      }
+    #else
+      print1("ParabolicRHS:[Ema] Error computing temperature, this EOS not implemented!")
+    #endif
+    vh     = state.vh;
+    tc_flx = state.tc_flux;
   #endif
 
 max_inv_dtp[0] = max_inv_dtp[1] = max_inv_dtp[2] = 0.0;

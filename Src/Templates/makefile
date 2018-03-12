@@ -1,7 +1,7 @@
 # *********************************************************
 #
 #                  PLUTO 4.2  Makefile
-#										modified by Ema(added gamma_transp.o to OBJ)
+#										
 # *********************************************************
 
 pluto:                              # Default target

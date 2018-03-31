@@ -67,6 +67,7 @@
     lower corner index lies below or above the upper index 
     (e.g. B->ib <= B->ie or not). 
 */
+/*[Ema] BOX_LOOP() loops from kb,jb,ib(all incuded) to ke,je,ie(all included!) */
 #define BOX_LOOP(B,k,j,i) \
  for ((B)->dk = ((k=(B)->kb) <= (B)->ke ? 1:-1); k != (B)->ke+(B)->dk; k += (B)->dk)\
  for ((B)->dj = ((j=(B)->jb) <= (B)->je ? 1:-1); j != (B)->je+(B)->dj; j += (B)->dj)\
@@ -293,4 +294,3 @@
  #define AVERAGE_YZ(q,k,j,i)   0.5*(q[0][j][i] + q[0][j+1][i])
 
 #endif
-

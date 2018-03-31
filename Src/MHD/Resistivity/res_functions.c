@@ -258,7 +258,16 @@ void GetCurrent (const Data *d, int dir, Grid *grid)
   /* ----------------------------------------------------
       IDIR: Compute {Jx1, Jx2, Jx3} at i+1/2,j,k faces.
      ---------------------------------------------------- */
-
+    /*[Ema] Do a loop:
+    in direction IDIR: from first (0) gridpoint, to last-IOFFSET (included!!)
+    in direction JDIR: from first JOFFSET gridpoint, to last-JOFFSET (included!!)
+    in direction KDIR: from first KOFFSET gridpoint, to last-KOFFSET
+    e.g: if IOFFSET==1,JOFFSET==1, KOFFSET=0
+    then I loop in this way:
+    in direction IDIR: from point 0 to second-to-last, included (penultimo incluso) 
+    in direction JDIR: from point 1 to second-to-last, included (penultimo incluso)
+    in direction KDIR: from point 0 to last (ultimo), included (ultimo incluso)
+    */
     box.ib =       0; box.ie = NX1_TOT-1-IOFFSET;
     box.jb = JOFFSET; box.je = NX2_TOT-1-JOFFSET;
     box.kb = KOFFSET; box.ke = NX3_TOT-1-KOFFSET;

@@ -108,7 +108,7 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
 {
   int  i, nv, err, ifail;
   int  use_entropy, use_energy=1;
-  double tau, rho, gmm1, rhoe, T;
+  double tau, rho, gmm1, rhoe, T; //[Ema] rhoe: internal energy of gas in code units
   double b2, m2, kinb2, rhog1;
   double *u, *v;
 
@@ -225,6 +225,7 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
     if (err){  /* If something went wrong while retrieving the  */
                /* temperature, we floor \c T to \c T_CUT_RHOE,  */
                /* recompute internal and total energies.        */
+      print1("! ConsToPrim: rhoe=%g, T=%g\n", rhoe, T); //[Ema]: I add this for more clarity
       T = T_CUT_RHOE;
       WARNING(
         print ("! ConsToPrim: rhoe < 0 or T < T_CUT_RHOE; ");

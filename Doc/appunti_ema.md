@@ -14,7 +14,7 @@ e
 `split_source.c/SplitSource(..)`[*operator-split*] -> `AdvanceStep(..)`[*non operator-split*]
 
 __Attenzione__:
-(i) Non caso non si stia usando l'agoritmo STS, nè RKC, nè cooling, `SplitSource(..)` non fa alcunchè!
+(i) In caso non si stia usando l'agoritmo STS, nè RKC, nè cooling, `SplitSource(..)` non fa alcunchè!
 (ii) Non confondere *operator-split* con *dimensional-splitting*: il primo si riferisce alla separazione degli operatori, il secondo (che è un caso particolare del primo) degli addendi dati dalle diverse dimensioni spaziali.
 
 ### Advance step

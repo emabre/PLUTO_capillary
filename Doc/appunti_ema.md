@@ -47,3 +47,9 @@ Considera radiative losses (qui li trascuro) e termini *parabolici*:
   `VISCOSITY` -> eq. momento, eq. energia
   `RESISTIVITY` ->  eq. induzione, eq. energia
   `THERMAL_CONDUCTION` -> eq. energia
+
+
+# Altre INFO utili:
+## Init()
+Pare che la funzione Init() non riceva in input i puri centri cella, ma dei punti che paiono essere qualcosa tipo i baricentri delle celle (l'ho notato ovviamente solo in simmetria 2D cilindrica assialsimmetrica). Pare anche che in questo modo, se io
+do un campo magnetico lineare da r=0 (B=0) a r=rmax (B=Bmax), e lo do semplicemente con l'istruzione "us[iBPHI] = Bmax*x1/rmax;" lui da al campo magnetico il valore corretto nelle celle (vuol dire che gli da il valore corrispondente alla media che ha il campo magnetico sulla cella). Notare che se a init fossero dati i centri cella, io dovrei occuparmi di decidere il valore medio di B in ogni cella (perchè il valore medio in geometria cilindrica non è semplicemente Bmax*x1/rmax, ci vuole un fattore correttivo).

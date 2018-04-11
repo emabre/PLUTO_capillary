@@ -14,7 +14,7 @@ e
 `split_source.c/SplitSource(..)`[*operator-split*] -> `AdvanceStep(..)`[*non operator-split*]
 
 __Attenzione__:
-(i) Non caso non si stia usando l'agoritmo STS, nè RKC, nè cooling, `SplitSource(..)` non fa alcunchè!
+(i) In caso non si stia usando l'agoritmo STS, nè RKC, nè cooling, `SplitSource(..)` non fa alcunchè!
 (ii) Non confondere *operator-split* con *dimensional-splitting*: il primo si riferisce alla separazione degli operatori, il secondo (che è un caso particolare del primo) degli addendi dati dalle diverse dimensioni spaziali.
 
 ### Advance step
@@ -53,3 +53,10 @@ Considera radiative losses (qui li trascuro) e termini *parabolici*:
 ## Init()
 Pare che la funzione Init() non riceva in input i puri centri cella, ma dei punti che paiono essere qualcosa tipo i baricentri delle celle (l'ho notato ovviamente solo in simmetria 2D cilindrica assialsimmetrica). Pare anche che in questo modo, se io
 do un campo magnetico lineare da r=0 (B=0) a r=rmax (B=Bmax), e lo do semplicemente con l'istruzione "us[iBPHI] = Bmax*x1/rmax;" lui da al campo magnetico il valore corretto nelle celle (vuol dire che gli da il valore corrispondente alla media che ha il campo magnetico sulla cella). Notare che se a init fossero dati i centri cella, io dovrei occuparmi di decidere il valore medio di B in ogni cella (perchè il valore medio in geometria cilindrica non è semplicemente Bmax*x1/rmax, ci vuole un fattore correttivo).
+
+## TC_Flux()
+TC_Flux() costruisce il "flusso" di calore all'opposto di quello che fisicamente è davvero il flusso di calore:
+$$\vec{q}_{\mathrm{PLUTO}} \doteq k \nabla T $$,
+visto che il flusso vero di calore è l'opposto:
+$$\vec{q}_{\mathrm{PLUTO}} \doteq - k \nabla T $$,
+per questo motivo poi la legge di costruzione del parabolic right hand side(`parabolic_rhs.c` riga 313) (e forse anche nel suo analogo per l'algoritmo esplicito.. ma non ho controllato) può parere sbagliata, ma è corretta!

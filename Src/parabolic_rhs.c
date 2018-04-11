@@ -305,7 +305,12 @@ max_inv_dtp[0] = max_inv_dtp[1] = max_inv_dtp[2] = 0.0;
        #if GEOMETRY == CARTESIAN
         du[ENG] += (tc_flx[i][ENG] - tc_flx[i-1][ENG])*dtdl;
        #else
-        du[ENG] += (A[i]*tc_flx[i][ENG] - A[i-1]*tc_flx[i-1][ENG])*dtdV;
+       /*[Ema] Here the effect of cylindrical (maybe also other) geometry
+         on the TC is included. Note that the thermal flux was defined as 
+         q=k*grad(T) wich is the opposite as the physical heat flux.
+         For this reason, the way du[ENG] is build might look (at a first glance) puzzling,
+         but it's correct!*/
+        du[ENG] += (A[i]*tc_flx[i][ENG] - A[i-1]*tc_flx[i-1][ENG])*dtdV; // A:the right interface area, dtdV: dt/(cell volume)
        #endif
       #endif
     }

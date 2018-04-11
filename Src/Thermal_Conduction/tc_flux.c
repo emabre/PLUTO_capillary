@@ -70,6 +70,8 @@ void TC_Flux (double ***T, const State_1D *state,
  *
  * \return This function has no return value.                       
  *********************************************************************** */
+/*[Ema] Attention: the flux is computed as k*grad(T), which is the opposite as the actual
+  physical heat flux (q_heat = -k*grad(T))*/
 {
   int  i, j, k, nv;
   double bgradT, Bmag, dTmag;

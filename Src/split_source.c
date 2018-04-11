@@ -20,7 +20,8 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
-
+//[Ema] mettere mano alla split source per aggiungere l'adi, perchè qui si
+//      fa lo step di tipo operator-split
 /* ********************************************************************* */
 void SplitSource (const Data *d, double dt, Time_Step *Dts, Grid *grid)
 /*! 

@@ -90,7 +90,9 @@ void TC_Flux (double ***T, const State_1D *state,
   if (gradT == NULL) {
     gradT = ARRAY_2D(NMAX_POINT, 3, double);
   }
-
+  /*[Ema] Here the gradient is computed. Only the componet in direction g_dir is always 
+    used, the other ones are needed for the application of flux saturation or to
+    apply different thermal conductivity orthogonal and parallel to mag field.*/
   GetGradient (T, gradT, beg, end, grid);
   if (g_dir == JDIR || g_dir == KDIR) x1 = grid[IDIR].x[g_i];
   if (g_dir == IDIR || g_dir == KDIR) x2 = grid[JDIR].x[g_j];

@@ -31,9 +31,13 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
+#include "gamma_transp.h"
+#include "capillary_wall.h"
+#include "freeze_fluid.h"
+
 static void SaveAMRFluxes (const State_1D *, double **, int, int, Grid *);
 static intList TimeStepIndexList();
-
+void ApplyMultipleGhosts(const Data*, int);
 /* ********************************************************************* */
 void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
                  Riemann_Solver *Riemann, double dt, Time_Step *Dts,
@@ -146,6 +150,22 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
     g_dir = dir;
     SetIndexes (&indx, grid);  /* -- set normal and transverse indices -- */
+
+    /*[Ema] Potrebbe essere una buona idea inserire qui una funzione che
+    adatta i valori in d per tenere conto di diverse condizioni al contorno,
+    ovvero ghost cells, che devono essere usate quando si integra scorrendo
+    in direzioni diverse? Ovvio che devo inserirla in un #ifdef INTERNL_BOUN..
+    e in un #ifdef con una MACRO creata da me per accendere/spegnere quel comportamento*/
+    /**********/
+    /*[Ema]: experimental: I set separate ghost cells for different direction.
+    This is an attempt to solve the problem of corner ghost cells inside
+    internal boundary, there one would require a double
+    (in 2D, or triple, in 3D) ghost cell.*/
+    #if (INTERNAL_BOUNDARY == YES) && (MULTIPLE_GHOSTS == YES)
+      ApplyMultipleGhosts(d, g_dir); // I must have defined an array (some pointers to..) of d_correction structure
+    #endif
+    /** end of Ema's experimental part ********/
+
     ResetState (d, &state, grid);
 
     #if (RESISTIVITY == EXPLICIT) && !(defined STAGGERED_MHD)
@@ -154,7 +174,12 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
 
     TRANSVERSE_LOOP(indx,ip,i,j,k){
       g_i = i;  g_j = j;  g_k = k;
+      /*[Ema] since TRANSVERSE_LOOP has been called,
+      ip can be one of i,j,k depending on g_dir*/
       for ((*ip) = 0; (*ip) < indx.ntot; (*ip)++) {
+        /*[Ema] I am scanning over one of i,j,k keeping the other two fixed
+         (only for this turn in the transverse loop, then the other two change
+       and I scan the one again..)*/
         VAR_LOOP(nv) state.v[(*ip)][nv] = d->Vc[nv][k][j][i];
         state.flag[*ip] = d->flag[k][j][i];
         #ifdef STAGGERED_MHD
@@ -163,7 +188,12 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
       }
       CheckNaN (state.v, 0, indx.ntot-1,0);
       States  (&state, indx.beg - 1, indx.end + 1, grid);
-      Riemann (&state, indx.beg - 1, indx.end, Dts->cmax, grid);
+      /*[Ema] I skip the Riemann solver if we are in "Frozen Fluid" setting*/
+      #ifdef FREEZE_FLUID
+        ZeroHypFlux (&state, indx.beg - 1, indx.end, Dts->cmax, grid);
+      #else
+        Riemann (&state, indx.beg - 1, indx.end, Dts->cmax, grid);
+      #endif
       #ifdef STAGGERED_MHD
        CT_StoreEMF (&state, indx.beg - 1, indx.end, grid);
       #endif
@@ -231,15 +261,15 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
    ------------------------------------------------------------------- */
 
   #if (ENTROPY_SWITCH)  && (RESISTIVITY == EXPLICIT)
-   EntropyOhmicHeating(d, UU, dt, grid);
+   EntropyOhmicHeating(d, UU, dt, grid);/*[Ema] I can't use entropy switch*/
   #endif
 
-  #ifdef SHEARINGBOX
+  #ifdef SHEARINGBOX /*[Ema] I don't need to use it*/
    SB_CorrectFluxes (UU, 0.0, dt, grid);
   #endif
 
   #ifdef STAGGERED_MHD
-   CT_Update(d, d->Vs, dt, grid);
+   CT_Update(d, d->Vs, dt, grid);/*[Ema] I can't use it*//*[Ema] I must not use it*/
   #endif
 
   #if DIMENSIONAL_SPLITTING == YES
@@ -495,3 +525,23 @@ intList TimeStepIndexList()
 
   return cdt;
 }
+
+#if MULTIPLE_GHOSTS == YES
+  /***********************************************
+  * Author :  Ema
+  * date : 03/01/18
+  * Purpose: Apply multiple ghost cells in internal boundary,
+  *          which means overwrite the present Data *d in certain points with
+  *          values which depends on the integration direction
+  *
+  ***********************************************/
+  void ApplyMultipleGhosts(const Data *d, int direction) {
+    int nv, pp, k,j,i;
+    for (pp = 0; pp < d_correction[direction].Npoints; pp++){
+      i = d_correction[direction].i[pp];
+      j = d_correction[direction].j[pp];
+      k = d_correction[direction].k[pp];
+      VAR_LOOP(nv) d->Vc[nv][k][j][i] = d_correction[direction].Vc[nv][pp];
+    }
+  }
+#endif

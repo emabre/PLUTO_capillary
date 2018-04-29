@@ -156,7 +156,11 @@ void RightHandSideSource (const State_1D *state, Time_Step *Dts,
        vphi = vc[iVPHI];
        IF_ROTATING_FRAME(w     = g_OmegaZ*x1[i];
                          vphi += w;)
+       /*[Ema] Here the term rho*v_phi^2/R - B_phi^2/R is added to the rhs.
+         If I want to block the fluid movement, I must not do that*/
+       #ifndef FREEZE_FLUID
        rhs[i][MX1] += dt*(vc[RHO]*vphi*vphi - TotBB(vc, Bg0[i], iBPHI, iBPHI))*r_1;
+       #endif
       #endif
 
 #elif GEOMETRY == POLAR

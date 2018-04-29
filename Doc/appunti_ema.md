@@ -60,3 +60,9 @@ $$\vec{q}_{\mathrm{PLUTO}} \doteq k \nabla T $$,
 visto che il flusso vero di calore è l'opposto:
 $$\vec{q}_{\mathrm{PLUTO}} \doteq - k \nabla T $$,
 per questo motivo poi la legge di costruzione del parabolic right hand side(`parabolic_rhs.c` riga 313) (e forse anche nel suo analogo per l'algoritmo esplicito.. ma non ho controllato) può parere sbagliata, ma è corretta!
+
+# Implementazione di sistema ADI e altro (tipo: blocare il fluido e simili..)
+Riguardo a dove mettere i file, quali copiare e quali sovrescrivere nella sorgente di pluto:
+-**I file nuovi** che creo li lascio della cartella della mia simulazone (se no devo modificare lo schema dei make e simili...). A lavoro ultimato potrò spostarli nella cartella di pluto e ordinare il sistema di file e makefile.
+-**I file di Pluto li modifico nella sua cartella**, eccezzione fatta per quelli che di norma vanno sempre copiati da me, tipo pvte_law.c, tc_kappa.c ... ( in questo modo sposto su pluto le modifiche che jo fatto per il calcolo di T, per le "multiple ghosts", per bloccare il fluido". Motivo: così non devo copiarmi nella mia cartella della simulazione tutti i file che modifico e poi avere sempre da controllare se un certo file l'ho copiato da me o no..
+-**Commenti** Ogni modifica che faccio nei file di pluto viene corredata da un commento /*[Ema]*/ ( racchiusa dentro un blocco di commenti o evidenziata in qualche modo! Così non mi confondo. Poi se farò push a qualche repository con visibiltà pubblica allora toglierò quei commenti

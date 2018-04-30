@@ -3,11 +3,14 @@
    ********************************************************************* */
 
 /*Added by [Ema]*/
-void ApplyMultipleGhosts(const Data *, int);
+void ADI (const Data *d, Time_Step *, Grid *);
 /*End added by [Ema]*/
 int    AdvanceStep(const Data *, Riemann_Solver *, Time_Step *, Grid *);
 void   AdvectFlux (const State_1D *, int, int, Grid *);
 void   Analysis (const Data *, Grid *);
+/*Added by [Ema]*/
+void ApplyMultipleGhosts(const Data *, int);
+/*End added by [Ema]*/
 
 void   Boundary    (const Data *, int, Grid *);
 

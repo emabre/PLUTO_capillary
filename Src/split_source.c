@@ -70,4 +70,12 @@ void SplitSource (const Data *d, double dt, Time_Step *Dts, Grid *grid)
   #if (PARABOLIC_FLUX & RK_CHEBYSHEV)
    RKC (d, Dts, grid);
   #endif
+
+  /*[Ema] For use of ADI*/
+  #if (PARABOLIC_FLUX & ALTERNATING_DIRECTION_IMPLICIT)
+   #if VISCOSITY != NO
+    #error Viscosity not implemented in ADI algorithm
+   #endif
+   ADI (d, Dts, grid);
+  #endif
 }

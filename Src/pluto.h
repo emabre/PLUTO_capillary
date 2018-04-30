@@ -67,6 +67,7 @@
 #define EXPLICIT             1 /* -- just a number different from 0 !!!  -- */
 #define SUPER_TIME_STEPPING  2 /* -- just a number different from EXPLICIT -- */ 
 #define RK_CHEBYSHEV         4  
+#define ALTERNATING_DIRECTION_IMPLICIT  8 /*[Ema] So that it occupies the third bit*/
 
 /* ---- Operator step labels ---- */
 
@@ -447,7 +448,7 @@
 /* *********************************************************************
     Diffusion operators: PARABOLIC_FLUX is the bitwise OR
     combination of all operators, each being either one of 
-    NO, EXPLICIT (1st bit), STS (2nd bit). 
+    NO, EXPLICIT (1st bit), STS (2nd bit)
     It can take the following values
 
       00   --> no diffusion operator is being used
@@ -457,9 +458,17 @@
       10   --> there's at least one sts diffusion operator and
                no explicit one.
       11   --> mixed: there is at least one explicit and sts operator
+      
+      [Ema] And also there are RKC(maybe not fully implemented) and ADI(implemented by Ema)..)
+            so just add two bits in front of the other bits (3rd: rkc, 4th: adi):
+      0100 --> at least one rkc diffusion operator is used
+      1000 --> at least one adi diffusion operator is used
+      for instance: 1001 would mean that one adi and one explicit is used
+      (but please note that explicit and adi are currently not compatible)
+      [end Ema's comment]
    ********************************************************************* */
-
 #define PARABOLIC_FLUX (RESISTIVITY|THERMAL_CONDUCTION|VISCOSITY)
+
 
 /* ********************************************************
     Include more header files

@@ -113,6 +113,7 @@ void TC_Flux (double ***T, const State_1D *state,
   for (i = beg; i <= end; i++){
 
     for (nv = 0; nv < NVAR; nv++) {
+      /*[Ema] The central values on the neighbouring cells are averaged*/
       vi[nv]  = 0.5*(state->vh[i][nv] + state->vh[i+1][nv]);
     }
   /* ------------------------------------------------

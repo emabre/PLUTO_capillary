@@ -111,6 +111,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   double *dtdV2, **rhs;
   RBox *box = GetRBox(DOM, CENTER);
 
+  /*[Ema] These variables are needed for the generalization of the computation
+  of the temperature*/
+  double mu;
+  double v[NVAR];
+
 /* -----------------------------------------------------------------
                Check algorithm compatibilities
    ----------------------------------------------------------------- */
@@ -206,7 +211,8 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
         if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
           print1("AdvanceStep:[Ema] Error computing temperature!");
         }
-        T[k][j][i] = T[k][j][i] / KELVIN;
+        GetMu(T[k][j][i], v[RHO], &mu);
+        T[k][j][i] = T[k][j][i] / (mu*(KELVIN));
       #else
         print1("AdvanceStep:[Ema] Error computing temperature, this EOS not implemented!")
       #endif
@@ -478,7 +484,8 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
          if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
            print1("AdvanceStep:[Ema] Error computing temperature!");
          }
-         T[k][j][i] = T[k][j][i] / KELVIN;
+         GetMu(T[k][j][i], v[RHO], &mu);
+         T[k][j][i] = T[k][j][i] / (mu*(KELVIN));
        #else
          print1("AdvanceStep:[Ema] Error computing temperature, this EOS not implemented!")
        #endif

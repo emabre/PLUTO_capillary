@@ -3,7 +3,7 @@
   \file
   \brief Initialize geometry-dependent grid quantities.
 
-  Compute grid quantities (such as interface areas, volumes, 
+  Compute grid quantities (such as interface areas, volumes,
   centroid of volume, etc..) that depend on the geometry.
 
   \author A. Mignone (mignone@ph.unito.it)
@@ -33,7 +33,7 @@ void MakeGeometry (Grid *GXYZ)
   kend = GXYZ[2].lend + GXYZ[2].nghost;
 
 /*  --------------------------------------------------------------
-     Memory allocation. All values are defined at the cell center 
+     Memory allocation. All values are defined at the cell center
      with the exception of the area element which is defined on a
      staggered mesh and therefore starts at [-1].
     ----------------------------------------------------------- */
@@ -51,17 +51,17 @@ void MakeGeometry (Grid *GXYZ)
 /* ------------------------------------------------------------
     Define area (A), volume element (dV) and cell geometrical
     centers for each direction.
-    
+
     Conventions:
     - G->dx: spacing (always > 0)
     - G->x:  cell-center. Can be > 0 or < 0
     - G->xgc: geometrical cell center.
-    ----------------------------------------------------------- */  
+    ----------------------------------------------------------- */
 
 /* ------------------------------------------------------------
                      X1 (IDIR) Direction
    ------------------------------------------------------------ */
- 
+
   GG = GXYZ;
   for (i = 0; i <= iend; i++) {
 
@@ -76,10 +76,10 @@ void MakeGeometry (Grid *GXYZ)
      GG->dV[i]  = dx;
      GG->xgc[i] = x;
     #elif GEOMETRY == CYLINDRICAL || GEOMETRY == POLAR
-     GG->A[i]   = fabs(xr); 
+     GG->A[i]   = fabs(xr);
      if (i == 0) GG->A[-1] = fabs(xl);
      GG->dV[i]  = fabs(x)*dx;
-     GG->xgc[i] = x + dx*dx/(12.0*x); 
+     GG->xgc[i] = x + dx*dx/(12.0*x);
      GG->r_1[i] = 1.0/x;
     #elif GEOMETRY == SPHERICAL
      GG->A[i]   = xr*xr;
@@ -105,9 +105,9 @@ void MakeGeometry (Grid *GXYZ)
     #if GEOMETRY != SPHERICAL
      GG->A[j]   = 1.0;
      if (j == 0) GG->A[-1] = 1.0;
-     GG->dV[j]  = dx;    
+     GG->dV[j]  = dx;
      GG->xgc[j] = x;
-    
+
     #else
      GG->A[j]   = fabs(sin(xr));
      if (j == 0) GG->A[-1] = fabs(sin(xl));
@@ -122,7 +122,7 @@ void MakeGeometry (Grid *GXYZ)
 /* ------------------------------------------------------------
                     X3 (KDIR) Direction
    ------------------------------------------------------------ */
-  
+
   GG = GXYZ + 2;
   for (k = 0; k <= kend; k++) {
     dx  = GG->dx[k];
@@ -149,7 +149,7 @@ void MakeGeometry (Grid *GXYZ)
     for (i = 0; i < GXYZ[idim].np_tot-1; i++) {
       GXYZ[idim].inv_dxi[i] = 2.0/(GXYZ[idim].dx[i] + GXYZ[idim].dx[i+1]);
     }
-  }  
+  }
 }
 
 /* ********************************************************************** */
@@ -212,7 +212,7 @@ double *GetInverse_dl (const Grid *grid)
  *    {dr}_i                      if g_dir == IDIR
  *    {r_i*dtheta}_j              if g_dir == JDIR
  *    {r_i*sin(theta_j)*dphi}_k   if g_dir == KDIR
- *   
+ *
  *
  ********************************************************************* */
 {
@@ -228,7 +228,7 @@ double *GetInverse_dl (const Grid *grid)
     int    j;
     double r_1;
     static double *inv_dl;
-   
+
     if (inv_dl == NULL) {
      #ifdef CHOMBO
       inv_dl = ARRAY_1D(NX2_MAX, double);
@@ -275,4 +275,3 @@ double *GetInverse_dl (const Grid *grid)
 
   return NULL;
 }
-

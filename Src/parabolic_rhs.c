@@ -74,6 +74,7 @@ double ParabolicRHS (const Data *d, Data_Arr dU, double dt, Grid *grid)
   double max_inv_dtp[3],inv_dtp;
 
   double v[NVAR]; /*[Ema] I hope that NVAR as dimension is fine!*/
+  double mu; /*[Ema] I define this to use it to normalize the temperature*/
 
   i = j = k = 0;
 
@@ -115,7 +116,8 @@ double ParabolicRHS (const Data *d, Data_Arr dU, double dt, Grid *grid)
         if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
           print1("ParabolicRHS:[Ema] Error computing temperature!\n");
         }
-        T[k][j][i] = T[k][j][i] / KELVIN;
+        GetMu(T[k][j][i], v[RHO], &mu);
+        T[k][j][i] = T[k][j][i] / (mu*(KELVIN));
       }
     #else
       print1("ParabolicRHS:[Ema] Error computing temperature, this EOS not implemented!")

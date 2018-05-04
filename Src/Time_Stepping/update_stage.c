@@ -64,6 +64,11 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
   Index indx;
   intList cdt_list;
 
+  /*[Ema] These variables are needed for the generalization of the computation
+  of the temperature*/
+  double mu;
+  double v[NVAR];
+
   #if DIMENSIONAL_SPLITTING == YES
    beg_dir = end_dir = g_dir;
   #else
@@ -135,7 +140,8 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
        if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
          print1("UpdateStage:[Ema] Error computing temperature!");
        }
-       T[k][j][i] = T[k][j][i] / KELVIN;
+       GetMu(T[k][j][i], v[RHO], &mu);
+       T[k][j][i] = T[k][j][i] / (mu*(KELVIN));
      #else
        print1("UpdateStage:[Ema] Error computing temperature, this EOS not implemented!")
      #endif

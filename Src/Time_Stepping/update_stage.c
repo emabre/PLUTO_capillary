@@ -64,19 +64,17 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
   Index indx;
   intList cdt_list;
 
-  /*[Ema] This variable is needed for the generalization of the computation
-  of the temperature*/
-  double v[NVAR];
+  #if EOS==PVTE_LAW
+    /*[Ema] This variable is needed for the generalization of the computation
+    of the temperature*/
+    double v[NVAR];
+  #endif
 
   #if DIMENSIONAL_SPLITTING == YES
    beg_dir = end_dir = g_dir;
   #else
    beg_dir = 0;
    end_dir = DIMENSIONS-1;
-  #endif
-
-  #if EOS==PVTE_LAW
-    double v[NVAR];
   #endif
 
   cdt_list = TimeStepIndexList();

@@ -66,3 +66,10 @@ Riguardo a dove mettere i file, quali copiare e quali sovrescrivere nella sorgen
 -**I file nuovi** che creo li lascio della cartella della mia simulazone (se no devo modificare lo schema dei make e simili...). A lavoro ultimato potrò spostarli nella cartella di pluto e ordinare il sistema di file e makefile.
 -**I file di Pluto li modifico nella sua cartella**, eccezzione fatta per quelli che di norma vanno sempre copiati da me, tipo pvte_law.c, tc_kappa.c ... ( in questo modo sposto su pluto le modifiche che jo fatto per il calcolo di T, per le "multiple ghosts", per bloccare il fluido". Motivo: così non devo copiarmi nella mia cartella della simulazione tutti i file che modifico e poi avere sempre da controllare se un certo file l'ho copiato da me o no..
 -**Commenti** Ogni modifica che faccio nei file di pluto viene corredata da un commento /*[Ema]*/ ( racchiusa dentro un blocco di commenti o evidenziata in qualche modo! Così non mi confondo. Poi se farò push a qualche repository con visibiltà pubblica allora toglierò quei commenti
+
+## Normalizzazione del coefficiente $\frac{\partial{\epsilon}}{\partial T}$
+Per normalizzare $c \doteq \frac{\partial{\epsilon}}{\partial T}$ si fa:
+$$\hat c \doteq \frac{c}{c_0}$$
+con:
+$$c_0 = \frac{\rho_0 k_B}{m_u}$$
+**per info vedi quaderno infn rigido pagina 88 (sx+dx)**

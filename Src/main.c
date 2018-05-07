@@ -193,6 +193,7 @@ int main (int argc, char *argv[])
       #if (PARABOLIC_FLUX & RK_CHEBYSHEV)
        print1 (", Nrkc = %d",Dts.Nrkc);
       #endif
+      /*[Ema] Here add the output which tells how many substeps for subcycling are done and the dt value*/
       print1 ("]\n");
     }
 

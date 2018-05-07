@@ -73,3 +73,10 @@ $$\hat c \doteq \frac{c}{c_0}$$
 con:
 $$c_0 = \frac{\rho_0 k_B}{m_u}$$
 **per info vedi quaderno infn rigido pagina 88 (sx+dx)**
+
+## Gestione del time-step
+Ho visto che quando viene chiamato sts, l'unica cosa che cambia in Dts è Dts.int_dtp. Inoltre sts() usa g_dt come tipe-step da effettuare. Quindi, da fare:
++ fare che ADI() setti in dts il reciproco del timestep parabolico da step esplicito (come fa sts)
++ fare che viene stapato in output il dt parabolico esplicito che sarebbe usato se non fosse usato ADI
++ usare g_dt come dt di avanzamento in ADI()
++ ??modifica NextTimeStep() per il caso ADI: deve dividere il timestep secondo il valore di nsubs?? Oppure usare in input un parametro di courant basso?!

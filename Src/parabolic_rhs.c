@@ -273,6 +273,8 @@ max_inv_dtp[0] = max_inv_dtp[1] = max_inv_dtp[2] = 0.0;
           du[BX2] = -(A[i]*res_flx[i][BX2] - A[i-1]*res_flx[i-1][BX2])*dtdV; ,
           du[BX3] = -(res_flx[i][BX3] - res_flx[i-1][BX3])*dtdl;)
         #if EOS != ISOTHERMAL
+         /*[Ema] Why I do not add also the contribution of magnetic energy (B^2)?
+           res_flx[][ENG] only contains the contribution of ohmic heating*/
          du[ENG] += -(A[i]*res_flx[i][ENG] - A[i-1]*res_flx[i-1][ENG])*dtdV;
         #endif
 

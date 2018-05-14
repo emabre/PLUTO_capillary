@@ -3,7 +3,7 @@
   \file
   \brief Read runtime information from pluto.ini.
 
-  Parse and read runtime information from the initialization file 
+  Parse and read runtime information from the initialization file
   pluto.ini (default) and sets value of the runtime structure.
 
   \authors A. Mignone (mignone@ph.unito.it)
@@ -21,7 +21,7 @@
 /* ********************************************************************* */
 int RuntimeSetup (Runtime *runtime, Cmd_Line *cmd_line, char *ini_file)
 /*!
- * Open and parse the runtime initialization file. 
+ * Open and parse the runtime initialization file.
  * Assign values to the runtime structure.
  *
  * \param [out]  runtime     pointer to a Runtime structure
@@ -60,11 +60,11 @@ int RuntimeSetup (Runtime *runtime, Cmd_Line *cmd_line, char *ini_file)
   bound_opt[USERDEF]      = "userdef";
 
   runtime->log_freq = 1; /* -- default -- */
- 
+
   nlines = ParamFileRead(ini_file);
 
 /* ------------------------------------------------------------
-   [Grid] Section 
+   [Grid] Section
    ------------------------------------------------------------ */
 
   for (idim = 0; idim < 3; idim++){
@@ -79,26 +79,26 @@ int RuntimeSetup (Runtime *runtime, Cmd_Line *cmd_line, char *ini_file)
       runtime->npoint[idim]             += runtime->patch_npoint[idim][ip];
       runtime->grid_is_uniform[idim]     = 0;
 
-      strcpy (str_var, ParamFileGet(glabel[idim], ++ipos)); 
+      strcpy (str_var, ParamFileGet(glabel[idim], ++ipos));
 /*
 printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[idim][ip],str_var);
 */
       if (strcmp(str_var,"u") == 0 || strcmp(str_var,"uniform") == 0) {
         runtime->patch_type[idim][ip] = UNIFORM_GRID;
-        if (runtime->npatch[idim] == 1) runtime->grid_is_uniform[idim] = 1;        
-      }else if (strcmp(str_var,"s") == 0 || strcmp(str_var,"strecthed") == 0) { 
+        if (runtime->npatch[idim] == 1) runtime->grid_is_uniform[idim] = 1;
+      }else if (strcmp(str_var,"s") == 0 || strcmp(str_var,"strecthed") == 0) {
         runtime->patch_type[idim][ip] = STRETCHED_GRID;
       }else if (strcmp(str_var,"l+") == 0){
         runtime->patch_type[idim][ip] = LOGARITHMIC_INC_GRID;
       }else if (strcmp(str_var,"l-") == 0){
         runtime->patch_type[idim][ip] = LOGARITHMIC_DEC_GRID;
-      }else{ 
+      }else{
         printf ("\nSetup: You must specify either 'u', 's', 'l+' or 'l-' as grid-type in %s\n",
                 ini_file);
         QUIT_PLUTO(1);
       }
     }
-    
+
     runtime->patch_left_node[idim][ip] = atof(ParamFileGet(glabel[idim], ++ipos));
 
     if ( (ipos+1) != (runtime->npatch[idim]*3 + 3)) {
@@ -121,20 +121,20 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
   if (cmd_line->xres > 1) {
     rx =  (double)cmd_line->xres/(double)runtime->patch_npoint[IDIR][1];
     for (idim = 0; idim < DIMENSIONS; idim++){
-      if (runtime->npatch[idim] > 1){  
+      if (runtime->npatch[idim] > 1){
         printf ("! Setup: -xres option works on uniform, single patch grid\n");
         QUIT_PLUTO(1);
       }
-      
+
       dbl_var = (double)runtime->patch_npoint[idim][1];
       runtime->patch_npoint[idim][1] = MAX( (int)(dbl_var*rx), 1);
       dbl_var = (double)runtime->npoint[idim];
-      runtime->npoint[idim] = MAX( (int)(dbl_var*rx), 1); 
-    }  
+      runtime->npoint[idim] = MAX( (int)(dbl_var*rx), 1);
+    }
   }
 
 /* ------------------------------------------------------------
-   [Time] Section 
+   [Time] Section
    ------------------------------------------------------------ */
 
   runtime->cfl         = atof(ParamFileGet("CFL", 1));
@@ -150,15 +150,24 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
   runtime->first_dt    = atof(ParamFileGet("first_dt", 1));
 
 /* ------------------------------------------------------------
-   [Solver] Section 
+   [Solver] Section
    ------------------------------------------------------------ */
 
   sprintf (runtime->solv_type,"%s",ParamFileGet("Solver",1));
 
 /* ------------------------------------------------------------
-   [Boundary] Section 
+   [Boundary] Section
    ------------------------------------------------------------ */
-
+/*[Ema] Here the element of left_bound and right_bound fields
+        take the value of one the macros:
+        OUTFLOW
+        REFLECTIVE
+        AXISYMMETRIC
+        EQTSYMMETRIC
+        PERIODIC
+        SHEARING
+        USERDEF
+  */
   for (idim = 0; idim < 3; idim++){
 
     str = ParamFileGet(bbeg_label[idim], 1);
@@ -182,7 +191,7 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
   }
 
 /* ------------------------------------------------------------
-   [Static Grid Output] Section 
+   [Static Grid Output] Section
    ------------------------------------------------------------ */
 
 #ifndef CHOMBO
@@ -191,10 +200,10 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
     if ( (str = ParamFileGet("uservar", 2 + ip)) != NULL){
       sprintf (runtime->user_var_name[ip], "%s", str);
     }else{
-      printf ("! Setup: missing name after user var name '%s'\n", 
+      printf ("! Setup: missing name after user var name '%s'\n",
               runtime->user_var_name[ip-1]);
       QUIT_PLUTO(1);
-    } 
+    }
   }
 
 /* ---- set output directory ---- */
@@ -229,7 +238,7 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
 
   sprintf (output->mode,"%s",ParamFileGet("dbl",3));
   #ifdef USE_ASYNC_IO
-   if (    strcmp(output->mode,"single_file") 
+   if (    strcmp(output->mode,"single_file")
         && strcmp(output->mode,"single_file_async")
         && strcmp(output->mode,"multiple_files")){
       printf ("! Setup: expecting 'single_file', 'single_file_async' ");
@@ -242,7 +251,7 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
       printf (
       "! Setup: expecting 'single_file' or 'multiple_files' in dbl output\n");
       QUIT_PLUTO(1);
-   }     
+   }
   #endif
 
  /* ---- flt output ---- */
@@ -252,9 +261,9 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
     output->type  = FLT_OUTPUT;
     GetOutputFrequency(output, "flt");
 
-    sprintf (output->mode,"%s",ParamFileGet("flt",3));  
+    sprintf (output->mode,"%s",ParamFileGet("flt",3));
     #ifdef USE_ASYNC_IO
-     if (    strcmp(output->mode,"single_file") 
+     if (    strcmp(output->mode,"single_file")
           && strcmp(output->mode,"single_file_async")
           && strcmp(output->mode,"multiple_files")){
         printf ("! Setup: expecting 'single_file', 'single_file_async' ");
@@ -262,12 +271,12 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
         QUIT_PLUTO(1);
      }
     #else
-     if (    strcmp(output->mode,"single_file") 
+     if (    strcmp(output->mode,"single_file")
           && strcmp(output->mode,"multiple_files")){
         printf (
         "! Setup: expecting 'single_file' or 'multiple_files' in flt output\n");
         QUIT_PLUTO(1);
-     }  
+     }
     #endif
     if (ParamFileHasBoth ("flt","cgs")) output->cgs = 1;
     else                                output->cgs = 0;
@@ -343,7 +352,7 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
 
   runtime->log_freq = atoi(ParamFileGet("log", 1));
   runtime->log_freq = MAX(runtime->log_freq, 1);
-  
+
  /* -- set default for remaining output type -- */
 
   while (ipos < MAX_OUTPUT_TYPES){
@@ -397,24 +406,24 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
 #endif
 
 /* ------------------------------------------------------------
-   [Parameters] Section 
+   [Parameters] Section
    ------------------------------------------------------------ */
 
   fp = fopen(ini_file,"r");
-  
+
 /* -- find position at "[Parameters" -- */
 
-  for (ipos = 0; ipos <= nlines; ipos++){ 
+  for (ipos = 0; ipos <= nlines; ipos++){
     fgets(str_var, 512, fp);
-    
+
     if (strlen(str_var) > 0) {
       str = strtok (str_var,"]");
       if (strcmp(str,"[Parameters") == 0) break;
     }
   }
 
-  fgets(str_var, 512, fp); 
-  
+  fgets(str_var, 512, fp);
+
   for (ip = 0; ip < USER_DEF_PARAMETERS; ip++){
     fscanf (fp,"%s \n", str_var);
     dbl_var = atof(ParamFileGet(str_var,1));
@@ -432,13 +441,13 @@ printf ("%f  %d %s\n",runtime->patch_left_node[idim][ip],runtime->patch_npoint[i
 /* ********************************************************************* */
 void GetOutputFrequency(Output *output, const char *output_format)
 /*!
- *  Set the intervals between output files. 
+ *  Set the intervals between output files.
  *  This can be done in three different ways:
  *
  *  - dt: time interval in code units
  *  - dn: step interval
  *  - dclock: actual clock time (in hours)
- * 
+ *
  * However, dn and dclock are mutually exclusive.
  *
  *********************************************************************** */
@@ -480,7 +489,7 @@ void GetOutputFrequency(Output *output, const char *output_format)
     output->dclock = atof(str);           /* clock interval in seconds */
     output->dn     = -1;
   }else{
-    output->dclock = -1.0;    
+    output->dclock = -1.0;
     output->dn     = atoi(ParamFileGet(output_format, 2));
   }
 

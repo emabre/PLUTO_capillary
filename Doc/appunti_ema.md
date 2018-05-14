@@ -80,3 +80,14 @@ Ho visto che quando viene chiamato sts, l'unica cosa che cambia in Dts è Dts.in
 + fare che viene stapato in output il dt parabolico esplicito che sarebbe usato se non fosse usato ADI
 + usare g_dt come dt di avanzamento in ADI()
 + ??modifica NextTimeStep() per il caso ADI: deve dividere il timestep secondo il valore di nsubs?? Oppure usare in input un parametro di courant basso?!
+
+## Runtime struct, campi che specificano il boundary
+runtime->left_bound[X] (dove X vale IDIR o JDIR o KDIR) prende uno dei valori delle macro :
++ OUTFLOW
++ REFLECTIVE
++ AXISYMMETRIC
++ EQTSYMMETRIC
++ PERIODIC
++ SHEARING
++ USERDEF
+Lo stesso vale per runtime->right_bound[X]

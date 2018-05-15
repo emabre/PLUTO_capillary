@@ -117,7 +117,10 @@ void ResistiveFlux (Data_Arr V, Data_Arr curlB, double **res_flux,
       EXPAND(                                      ;   ,
             res_flux[i][BX2] = - eta[KDIR]*Jp[KDIR];   ,
             res_flux[i][BX3] =   eta[JDIR]*Jp[JDIR];)
-
+      /*[Ema] This (and its friends in the algorithms for the other directions)
+        contains the component of the Poynting vector due to the resistive part of
+        the electric field (the one due to advection (i.e.: BxV) is considered in other
+        parts of the program)*/
       #if HAVE_ENERGY
        res_flux[i][ENG] = EXPAND(0.0, + vp[BX2]*res_flux[i][BX2], 
                                       + vp[BX3]*res_flux[i][BX3]);

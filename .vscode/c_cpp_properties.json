@@ -35,7 +35,7 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "${workspaceRoot}",
-                "${SIMS}/disch_outcap",
+                "${SIMS}/sims_pluto/disch_outcap",
                 "${workspaceRoot}/Src/MHD",
                 "${workspaceRoot}/Src/EOS/PVTE",
                 "${workspaceRoot}/Src"
@@ -83,5 +83,5 @@
             }
         }
     ],
-    "version": 3
+    "version": 4
 }

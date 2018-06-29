@@ -86,7 +86,10 @@ void STS (const Data *d, Time_Step *Dts, Grid *grid)
   m = 0;
   n = STS_MAX_STEPS;
   while (m < n){
-
+    /*[Ema] Reason why here there is no need to call PrimToCons3D: the scheme
+      updates the conservative variables using the primitive ones as input
+      and at the end of any step of this cycle the ConsToPrim3D is called
+      (so there are up-to-date primitive variables at every step)*/
     g_intStage = m + 1;
     Boundary(d, ALL_DIR, grid);
     inv_dtp = ParabolicRHS(d, rhs, 1.0, grid); 

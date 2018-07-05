@@ -35,6 +35,7 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "${workspaceRoot}",
+                "${SIMS}/sims_pluto/disch_outcap/definitions.h",
                 "${SIMS}/sims_pluto/disch_outcap",
                 "${workspaceRoot}/Src/MHD",
                 "${workspaceRoot}/Src/EOS/PVTE",

@@ -524,6 +524,14 @@ int Integrate (Data *d, Riemann_Solver *Solver, Time_Step *Dts, Grid *grid)
      if (AdvanceStep (d, Solver, Dts, grid) != 0) return(1);
     #endif
   }
+  /*[Ema] #if added by Ema to do profiling of the code*/
+  #ifdef PROFILE_GPROF_STOPSTEP
+    if(g_stepNumber == PROFILE_GPROF_STOPSTEP){
+      print1("\nI exit to provide gprof data\n");
+      // chdir("/home/konrad/simulazioni/sims_pluto/disch_outcap");
+      exit(2);
+    }
+  #endif
 
   #ifdef GLM_MHD  /* -- GLM source for dt/2 -- */
    GLM_Source (d->Vc, 0.5*g_dt, grid);

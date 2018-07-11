@@ -501,7 +501,13 @@ int Integrate (Data *d, Riemann_Solver *Solver, Time_Step *Dts, Grid *grid)
   #ifdef FARGO
    FARGO_ComputeVelocity(d, grid);
   #endif
+
+  //[Ema] If you define "SPLIT_DIFF_ADV_ADV_DIFF" you switch the order of the split 
+  #ifdef SPLIT_DIFF_ADV_ADV_DIFF
+  if ((g_stepNumber%2) == 1){
+  #else
   if ((g_stepNumber%2) == 0){
+  #endif
     g_operatorStep = HYPERBOLIC_STEP;
     #if DIMENSIONAL_SPLITTING == YES
      for (g_dir = 0; g_dir < DIMENSIONS; g_dir++){

@@ -13,6 +13,7 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
+#include "debug_utilities.h"
 
 /* Weight factor for 2nd stage of RK integrators */
 
@@ -74,6 +75,12 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 
   g_intStage = 1;  
   Boundary (d, ALL_DIR, grid);
+  // [Ema] this is for debug
+  #ifdef DEBUG_EMA
+    printf("\nNstep:%d (ADV)\n",g_stepNumber);
+    printf("\nd->Vc[BX3][0][:][:]\n",g_stepNumber);
+    printmat4d(d->Vc, NX2_TOT, NX1_TOT, BX3, 0, -1, -1);
+  #endif
 #if (SHOCK_FLATTENING == MULTID) || (ENTROPY_SWITCH) 
   FlagShock (d, grid);
 #endif

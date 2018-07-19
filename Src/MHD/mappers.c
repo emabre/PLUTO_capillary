@@ -72,6 +72,9 @@ void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
 
     if (u[ENG] != u[ENG]){
       print("! PrimToCons: KE:%12.6e uRHO : %12.6e, m2 : %12.6e \n",rhoe,v[RHO],u[ENG]);
+      // [Ema] I add these lines for more clarity
+      print("! Step type is %d\n", g_operatorStep);
+      print("(%d=HYPERBOLIC_STEP, %d=PARABOLIC_STEP, %d=SOURCE_STEP)\n", HYPERBOLIC_STEP, PARABOLIC_STEP, SOURCE_STEP);
       QUIT_PLUTO(1);
     }
 #endif
@@ -217,6 +220,9 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
     if (u[ENG] != u[ENG]){
       print("! ConsToPrim: NaN found\n");
       Show(ucons,i);
+      // [Ema] I add these lines for more clarity
+      print("! Step type is %d\n", g_operatorStep);
+      print("(%d=HYPERBOLIC_STEP, %d=PARABOLIC_STEP, %d=SOURCE_STEP)\n",HYPERBOLIC_STEP, PARABOLIC_STEP, SOURCE_STEP);
       QUIT_PLUTO(1);
     }
     rhoe  = u[ENG] - kinb2;

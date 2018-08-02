@@ -12,6 +12,14 @@ void   Analysis (const Data *, Grid *);
 void ApplyMultipleGhosts(const Data *, int);
 /*End added by [Ema]*/
 
+/*[Ema] (Added by Ema) This function is needed for energy conservation computations*/
+double GetEnInRhs();
+/* End added by [Ema]*/
+/*[Ema] (Added by Ema) This function is to return outiside of this chunk of code the value of the energy incoming from borders computed
+when performing a single update_stage computation*/
+double GetEnInStage();
+/* End added by [Ema]*/
+
 void   Boundary    (const Data *, int, Grid *);
 
 char     *Array1D (int, size_t);

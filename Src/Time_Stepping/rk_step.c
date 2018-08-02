@@ -43,6 +43,9 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   static double  one_third = 1.0/3.0;
   static Data_Arr U0, Bs0;
   RBox *box = GetRBox (DOM, CENTER);
+  #if EN_CONS_CHECK
+  double en_in_partial[3]={0,0,0};
+  #endif
   
 /* ----------------------------------------------------
    0. Allocate memory 
@@ -96,6 +99,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 #endif
 
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
+  /*Added by [Ema]*/
+  #if EN_CONS_CHECK
+    en_in_partial[0] = GetEnInStage();
+  #endif
+  /*End added by [Ema]*/
 #ifdef STAGGERED_MHD
   CT_AverageMagneticField (d->Vs, d->Uc, grid);
 #endif
@@ -120,6 +128,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
            but Heun's method, also belonging to the family of RK2 methods.
   */
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
+  /*Added by [Ema]*/
+  #if EN_CONS_CHECK
+    en_in_partial[1] = GetEnInStage();
+  #endif
+  /*End added by [Ema]*/
   DOM_LOOP(k, j, i) VAR_LOOP(nv){
     d->Uc[k][j][i][nv] = w0*U0[k][j][i][nv] + wc*d->Uc[k][j][i][nv];
   }
@@ -152,6 +165,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #endif
 
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
+  /*Added by [Ema]*/
+  #if EN_CONS_CHECK
+    en_in_partial[2] = GetEnInStage();
+  #endif
+  /*End added by [Ema]*/
   DOM_LOOP(k,j,i) VAR_LOOP(nv){
     d->Uc[k][j][i][nv] = one_third*(U0[k][j][i][nv] + 2.0*d->Uc[k][j][i][nv]);
   }

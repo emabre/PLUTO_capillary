@@ -35,6 +35,10 @@
 #include "capillary_wall.h"
 #include "freeze_fluid.h"
 
+/*[Ema] Added by Ema. Here I reset to 0 the energy entering from boundaries, to study the energy conservation*/
+double en_in_stage;
+/*[Ema] End ema's addition*/
+
 static void SaveAMRFluxes (const State_1D *, double **, int, int, Grid *);
 static intList TimeStepIndexList();
 void ApplyMultipleGhosts(const Data*, int);
@@ -63,6 +67,12 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
   static State_1D state;
   Index indx;
   intList cdt_list;
+
+  /*[Ema] Added by Ema. Here I reset to 0 the energy entering from boundaries, to study the energy conservation*/
+  #if EN_CONS_CHECK
+    en_in_stage = 0;
+  #endif
+  /*[Ema] End ema's addition*/
 
   #if EOS==PVTE_LAW
     /*[Ema] This variable is needed for the generalization of the computation
@@ -209,6 +219,9 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
        SB_SaveFluxes (&state, grid);
       #endif
       RightHandSide (&state, Dts, indx.beg, indx.end, dt, grid);
+      #if EN_CONS_CHECK
+        en_in_stage += GetEnInRhs();
+      #endif
 
     /* -- update:  U = U + dt*R -- */
 
@@ -547,3 +560,9 @@ intList TimeStepIndexList()
     }
   }
 #endif
+
+/*[Ema] Added by Ema. This function is to return outiside of this chunk of code the value of the energy incoming from borders computed
+        when performing a single update_stage computation*/
+double GetEnInStage() {
+  return en_in_stage;
+}

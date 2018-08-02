@@ -84,6 +84,9 @@ static void TotalFlux (const State_1D *, double *, int, int, Grid *);
  #endif
 #endif
 
+// [Ema] Added by Ema. Energy entering the domain from boundaries due to advection, corresponding to a rhs computation
+double en_in_rhs;
+
 /* *********************************************************************** */
 void RightHandSide (const State_1D *state, Time_Step *Dts, 
                     int beg, int end, double dt, Grid *grid)
@@ -289,8 +292,12 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
 
 #elif GEOMETRY == CYLINDRICAL
 
+#if EN_CONS_CHECK
+  en_in_rhs = 0;
+#endif
+
 {
-  double R, z, phi, R_1; 
+  double R, z, phi, R_1;
 
 #if DUST == YES
   #error "DUST not implemented in CYLINDRICAL coordinates"
@@ -326,6 +333,15 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
       #endif
       IF_ENERGY(rhs[i][ENG] = -dtdV*(fA[i][ENG] - fA[i-1][ENG]);)
       NSCL_LOOP(nv)  rhs[i][nv] = -dtdV*(fA[i][nv] - fA[i-1][nv]);
+      /*[Ema] Here I update the energy flux from boundaries, to study the energy conservation*/
+      #if EN_CONS_CHECK
+        if (i == beg) {
+          en_in_rhs += dtdV*fA[i-1][ENG];
+        } else if (i == end) {
+          en_in_rhs += -dtdV*fA[i][ENG];
+        }
+      #endif
+      /*[Ema] End ema's addition*/
       
     /* -- I5. Add dissipative terms to entropy equation -- */
 
@@ -361,6 +377,15 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
     /* -- J1. initialize rhs with flux difference -- */
 
       NVAR_LOOP(nv) rhs[j][nv] = -dtdx*(flux[j][nv] - flux[j-1][nv]);
+      /*[Ema] Here I update the energy flux from boundaries, to study the energy conservation*/
+      #if EN_CONS_CHECK
+        if (i == beg) {
+          en_in_rhs += dtdx*fA[j-1][ENG];
+        } else if (i == end) {
+          en_in_rhs += -dtdx*fA[j][ENG];
+        }
+      #endif
+      /*[Ema] End ema's addition*/
       #if USE_PR_GRADIENT == YES
        rhs[j][iMZ] += - dtdx*(p[j] - p[j-1]);
       #endif
@@ -877,4 +902,10 @@ void TotalFlux (const State_1D *state, double *phi_p,
     #endif
     }
   }
+}
+
+/*[Ema] Added by Ema. This function is to return outiside of this chunk of code the value of the energy incoming from borders computed
+        when performing rhs computations*/
+double GetEnInRhs() {
+  return en_in_rhs;
 }

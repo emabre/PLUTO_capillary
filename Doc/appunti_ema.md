@@ -19,7 +19,7 @@ __Attenzione__:
 
 ### Advance step
 Essenzialemente, nel caso di metodi RKx,
-`rk_step.c/AdvanceStep(..)`, quando avanza le equazioni usa `UpdateStage(..)` (contornato dalle opportune trasformazioni da variabili primitive a conservative e dalle pesature delle variabili secondo i coefficienti dati dal metodo di RK).
+`rk_step.c/AdvanceStep(..)`, quando avanza le equazioni usa `UpdateStage(..)` (contornato dalle opportune trasformazioni da variabili primitive a conservative e dalle pesature delle variabili secondo i coefficienti dati dal metodo di RK. Notare che per il metodo del secondo ordine (RK2) non si usa il metodo più comune, detto metodo di Eulero modificato, o explicit midpoint method, ma il metodo di Heun (leggi Heun alla tedesca e trovi info su wikipedia)).
 ####`UpdateStage()`
 Cosa fa:
 + Calcola $\vec J$ e $T$;

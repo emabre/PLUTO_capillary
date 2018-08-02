@@ -60,7 +60,7 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 #endif
 
 /* ---------------------------------------------------------------
-   1. Predictor step (EULER, RK2, RK3)
+   1. Predictor step (EULER, RK2[[Ema] Heun's method, of RK2 family], RK3)
 
       After baoundaries have been set we flag zones lying in a
       shock. This is useful for shock flattening or entropy/energy
@@ -116,7 +116,9 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #if (INTERNAL_BOUNDARY == YES) && (DIMENSIONAL_SPLITTING == YES)
   PrimToCons3D (d->Vc, d->Uc, box);
   #endif   
-
+  /* [Ema] This is not "modified Euler Method"(also called explicit midpoint rule),
+           but Heun's method, also belonging to the family of RK2 methods.
+  */
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
   DOM_LOOP(k, j, i) VAR_LOOP(nv){
     d->Uc[k][j][i][nv] = w0*U0[k][j][i][nv] + wc*d->Uc[k][j][i][nv];

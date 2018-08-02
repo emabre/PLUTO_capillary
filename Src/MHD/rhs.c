@@ -536,23 +536,23 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
 
     /* -- I1. initialize rhs with flux difference -- */
 
-/* Alternative sequence 
-dVdx = dV1[i]/dx1[i];
-NVAR_LOOP(nv) rhs[i][nv] = -dtdV*(fA[i][nv] - fA[i-1][nv]);
-rhs[i][MX1] -= dtdx*(p[i] - p[i-1]);
-rhs[i][MX3] *= r_1;
-#if PHYSICS == MHD
- EXPAND(             
-                               ,
-      rhs[i][iBTH]  *= dVrdx;  ,
-      rhs[i][iBPHI] *= dVrdx;
-  )
- #ifdef GLM_MHD
-   rhs[i][iBR]     *= dVdx;
- #endif
-#endif
-IF_DUST(rhs[i][MX3_D] *= r_1;)
-*/
+  /* Alternative sequence 
+  dVdx = dV1[i]/dx1[i];
+  NVAR_LOOP(nv) rhs[i][nv] = -dtdV*(fA[i][nv] - fA[i-1][nv]);
+  rhs[i][MX1] -= dtdx*(p[i] - p[i-1]);
+  rhs[i][MX3] *= r_1;
+  #if PHYSICS == MHD
+  EXPAND(             
+                                ,
+        rhs[i][iBTH]  *= dVrdx;  ,
+        rhs[i][iBPHI] *= dVrdx;
+    )
+  #ifdef GLM_MHD
+    rhs[i][iBR]     *= dVdx;
+  #endif
+  #endif
+  IF_DUST(rhs[i][MX3_D] *= r_1;)
+  */
 
       rhs[i][RHO] = -dtdV*(fA[i][RHO] - fA[i-1][RHO]);
       EXPAND(

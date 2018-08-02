@@ -336,9 +336,9 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
       /*[Ema] Here I update the energy flux from boundaries, to study the energy conservation*/
       #if EN_CONS_CHECK
         if (i == beg) {
-          en_in_rhs += dtdV*fA[i-1][ENG];
+          en_in_rhs += dt*fA[i-1][ENG]*2*CONST_PI*dx2[g_j];
         } else if (i == end) {
-          en_in_rhs += -dtdV*fA[i][ENG];
+          en_in_rhs += -dt*fA[i][ENG]*2*CONST_PI*dx2[g_j];
         }
       #endif
       /*[Ema] End ema's addition*/
@@ -380,12 +380,13 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
       /*[Ema] Here I update the energy flux from boundaries, to study the energy conservation*/
       #if EN_CONS_CHECK
         if (i == beg) {
-          en_in_rhs += dtdx*fA[j-1][ENG];
+          en_in_rhs += dt*fA[j-1][ENG]*2*CONST_PI*dV1[g_i];
         } else if (i == end) {
-          en_in_rhs += -dtdx*fA[j][ENG];
+          en_in_rhs += -dt*fA[j][ENG]*2*CONST_PI*dV1[g_i];
         }
       #endif
       /*[Ema] End ema's addition*/
+
       #if USE_PR_GRADIENT == YES
        rhs[j][iMZ] += - dtdx*(p[j] - p[j-1]);
       #endif

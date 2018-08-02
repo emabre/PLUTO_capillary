@@ -44,10 +44,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   static double  one_third = 1.0/3.0;
   static Data_Arr U0, Bs0;
   RBox *box = GetRBox (DOM, CENTER);
+  /*Added by [Ema] Energy entering the domain from boundaries (via advection) during this time step*/
   #if EN_CONS_CHECK
-  double en_in_partial[3]={0,0,0};
+    double en_in_partial;
   #endif
-  
+  /* End added by [Ema]*/
 /* ----------------------------------------------------
    0. Allocate memory 
    ---------------------------------------------------- */
@@ -102,15 +103,14 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
   /*Added by [Ema]*/
   #if EN_CONS_CHECK
-    en_in_partial[0] = GetEnInStage();
+    en_in_partial = GetEnInStage();
   #endif
   /*End added by [Ema]*/
+
 #ifdef STAGGERED_MHD
   CT_AverageMagneticField (d->Vs, d->Uc, grid);
 #endif
   ConsToPrim3D (d->Uc, d->Vc, d->flag, box);
-
-  aggiungi qui la somma di energie parziali per avere la totale
 
 /* ----------------------------------------------------
    2. Corrector step (RK2, RK3)
@@ -133,12 +133,19 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
   /*Added by [Ema]*/
   #if EN_CONS_CHECK
-    en_in_partial[1] = GetEnInStage();
+    en_in_partial += GetEnInStage();
   #endif
   /*End added by [Ema]*/
+  
   DOM_LOOP(k, j, i) VAR_LOOP(nv){
     d->Uc[k][j][i][nv] = w0*U0[k][j][i][nv] + wc*d->Uc[k][j][i][nv];
   }
+  /*Added by [Ema]*/
+  #if EN_CONS_CHECK
+    en_in_partial *= wc;
+  #endif
+  /*End added by [Ema]*/
+
   #ifdef STAGGERED_MHD
   DIM_LOOP(nv) TOT_LOOP(k,j,i) {
     d->Vs[nv][k][j][i] = w0*Bs0[nv][k][j][i] + wc*d->Vs[nv][k][j][i];
@@ -150,8 +157,6 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   FARGO_ShiftSolution (d->Uc, d->Vs, grid);
   #endif 
   ConsToPrim3D (d->Uc, d->Vc, d->flag, box);
-
-  aggiungi qui la somma di energie parziali per avere la totale
 
 #endif  /* TIME_STEPPING == RK2/RK3 */
 
@@ -172,12 +177,19 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   UpdateStage(d, d->Uc, NULL, Riemann, g_dt, Dts, grid);
   /*Added by [Ema]*/
   #if EN_CONS_CHECK
-    en_in_partial[2] = GetEnInStage();
+    en_in_partial += GetEnInStage();
   #endif
   /*End added by [Ema]*/
+  
   DOM_LOOP(k,j,i) VAR_LOOP(nv){
     d->Uc[k][j][i][nv] = one_third*(U0[k][j][i][nv] + 2.0*d->Uc[k][j][i][nv]);
   }
+  /*Added by [Ema]*/
+  #if EN_CONS_CHECK
+    en_in_partial *= one_third*2.0;
+  #endif
+  /*End added by [Ema]*/
+
   #ifdef STAGGERED_MHD
   DIM_LOOP(nv) TOT_LOOP(k,j,i){
     d->Vs[nv][k][j][i] = (Bs0[nv][k][j][i] + 2.0*d->Vs[nv][k][j][i])/3.0;
@@ -190,9 +202,11 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #endif
   ConsToPrim3D (d->Uc, d->Vc, d->flag, box);
 
-  aggiungi qui la somma di energie parziali per avere la totale
 #endif /* TIME_STEPPING == RK3 */
 
+/*Added by [Ema]*/
+  en_adv_in += en_in_partial;
+/*End added by [Ema]*/
 
 #ifdef FARGO
   FARGO_AddVelocity (d,grid);

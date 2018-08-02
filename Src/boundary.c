@@ -525,6 +525,14 @@ void ReflectiveBound (double ***q, int s, int side, int vpos)
   }else if (side == X1_END){  
 
     if (box->vpos != X1FACE){
+      /* [Ema] Values are simply reflected across the boundary
+               (depending on "s", with sign changed or not!),
+               even if the ghost cells are more than one,
+               e.g.: with 2 ghots cells per side:
+                     q[k][j][IEND+1] = q[k][j][IEND]
+                     q[k][j][IEND+2] = q[k][j][IEND-1]
+               remember: IEND is the last cell index inside the real domain.
+      */
       BOX_LOOP(box,k,j,i) q[k][j][i] = s*q[k][j][2*IEND-i+1];
     }else{
       BOX_LOOP(box,k,j,i) q[k][j][i] = s*q[k][j][2*IEND-i];

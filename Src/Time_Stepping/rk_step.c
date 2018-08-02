@@ -14,6 +14,7 @@
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
 #include "debug_utilities.h"
+#include "capillary_wall.h"
 
 /* Weight factor for 2nd stage of RK integrators */
 
@@ -109,6 +110,8 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 #endif
   ConsToPrim3D (d->Uc, d->Vc, d->flag, box);
 
+  aggiungi qui la somma di energie parziali per avere la totale
+
 /* ----------------------------------------------------
    2. Corrector step (RK2, RK3)
    ---------------------------------------------------- */
@@ -148,6 +151,8 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   #endif 
   ConsToPrim3D (d->Uc, d->Vc, d->flag, box);
 
+  aggiungi qui la somma di energie parziali per avere la totale
+
 #endif  /* TIME_STEPPING == RK2/RK3 */
 
 /* ----------------------------------------------------
@@ -184,6 +189,8 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
   FARGO_ShiftSolution (d->Uc, d->Vs, grid);
   #endif
   ConsToPrim3D (d->Uc, d->Vc, d->flag, box);
+
+  aggiungi qui la somma di energie parziali per avere la totale
 #endif /* TIME_STEPPING == RK3 */
 
 

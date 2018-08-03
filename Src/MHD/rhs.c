@@ -71,6 +71,7 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
+#include "capillary_wall.h"
 
 static void TotalFlux (const State_1D *, double *, int, int, Grid *);
 
@@ -335,10 +336,16 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
       NSCL_LOOP(nv)  rhs[i][nv] = -dtdV*(fA[i][nv] - fA[i-1][nv]);
       /*[Ema] Here I update the energy flux from boundaries, to study the energy conservation*/
       #if EN_CONS_CHECK
-        if (i == beg) {
-          en_in_rhs += dt*fA[i-1][ENG]*2*CONST_PI*dx2[g_j];
-        } else if (i == end) {
-          en_in_rhs += -dt*fA[i][ENG]*2*CONST_PI*dx2[g_j];
+        if (g_j <= j_cap_inter_end) {
+          if (i == beg)
+            en_in_rhs += dt*fA[i-1][ENG]*2*CONST_PI*dx2[g_j];
+          else if (i == i_cap_inter_end)
+            en_in_rhs += -dt*fA[i][ENG]*2*CONST_PI*dx2[g_j];
+        } else {
+          if (i == beg)
+            en_in_rhs += dt*fA[i-1][ENG]*2*CONST_PI*dx2[g_j];
+          else if (i == end)
+            en_in_rhs += -dt*fA[i][ENG]*2*CONST_PI*dx2[g_j];
         }
       #endif
       /*[Ema] End ema's addition*/
@@ -379,10 +386,16 @@ void RightHandSide (const State_1D *state, Time_Step *Dts,
       NVAR_LOOP(nv) rhs[j][nv] = -dtdx*(flux[j][nv] - flux[j-1][nv]);
       /*[Ema] Here I update the energy flux from boundaries, to study the energy conservation*/
       #if EN_CONS_CHECK
-        if (i == beg) {
-          en_in_rhs += dt*fA[j-1][ENG]*2*CONST_PI*dV1[g_i];
-        } else if (i == end) {
-          en_in_rhs += -dt*fA[j][ENG]*2*CONST_PI*dV1[g_i];
+        if (g_i <= i_cap_inter_end) {
+          if (j == beg)
+            en_in_rhs += dt*flux[j-1][ENG]*2*CONST_PI*dV1[g_i];
+          else if (j == end)
+            en_in_rhs += -dt*flux[j][ENG]*2*CONST_PI*dV1[g_i];
+        } else {
+          if (j == j_cap_inter_end+1)
+            en_in_rhs += dt*flux[j-1][ENG]*2*CONST_PI*dV1[g_i];
+          else if (j == end)
+            en_in_rhs += -dt*flux[j][ENG]*2*CONST_PI*dV1[g_i];
         }
       #endif
       /*[Ema] End ema's addition*/

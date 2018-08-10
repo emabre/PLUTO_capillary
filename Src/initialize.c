@@ -335,7 +335,13 @@ void Initialize(int argc, char *argv[], Data *data,
 
   #endif
 
-  RuntimeSet (runtime);
+  /* This #if (BUT NOT THE LINE INSIDE! already present) has been added by [Ema]
+     Reason: I might want to call this function later, to store some useful addisional info.
+     Be careful: I added this #if because I want RuntimeSet() to be called only once, it
+     makes the code easier to read! */
+  #if (RUNTIMESET_CALL == DEFAULT || !defined(RUNTIMESET_CALL))
+    RuntimeSet (runtime);
+  #endif
 
 /* ----------------------------------------------------
     Set output directory and log file
@@ -496,6 +502,10 @@ void Initialize(int argc, char *argv[], Data *data,
 
   SetOutput (data, runtime);
 
+  /* Added by [Ema]: reason: calling it now is useful to save also some other useful info, which has been just set in "runtime"*/
+  #if RUNTIMESET_CALL == AFTER_SETOUTPUT
+    RuntimeSet (runtime);
+  #endif
 /* -----------------------------------
       print normalization units
    ----------------------------------- */

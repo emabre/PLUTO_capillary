@@ -265,7 +265,7 @@ typedef struct RUNTIME{
                                  held in memory and written to disk */
   int    anl_dn;               /*  number of step increment for ANALYSIS */
   char   solv_type[64];         /**< The Riemann solver (\c Solver) */
-  char   user_var_name[128][128];
+  char   user_var_name[128][128]; /*[Ema] user_var_name[i][..] represents the i-th name of user vars*/
   char   output_dir[256];         /**< The name of the output directory
                                        (\c output_dir for static PLUTO,
                                         \c Output_dir for PLUTO-Chombo)  */

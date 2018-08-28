@@ -11,7 +11,9 @@ void   Analysis (const Data *, Grid *);
 /*Added by [Ema]*/
 void ApplyMultipleGhosts(const Data *, int);
 /*End added by [Ema]*/
-
+/*Added by [Ema]*/
+int CheckUserVar (char *var_name);
+/*End added by [Ema]*/
 /*[Ema] (Added by Ema) This function is needed for energy conservation computations*/
 double GetEnInRhs();
 /* End added by [Ema]*/

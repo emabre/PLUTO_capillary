@@ -265,3 +265,19 @@ double ***GetUserVar (char *var_name)
   }
   return (all_outputs->V[indx]);
 }
+
+/* *********************************************************************
+ *  Function added by [Ema]
+ *  returns 1 if the output variable named 'var_name' exists.
+ *
+ *********************************************************************** */
+int CheckUserVar (char *var_name) {
+  int indx = -1;
+  
+  while (strcmp(all_outputs->var_name[++indx], var_name)){
+    if (all_outputs->V[indx] == NULL) return 0;
+  }
+  /* I don't return (all_outputs->V[indx]) (as GetUserVar() does) to be
+  (hopefully) compatible with future versions of PLUTO */
+  return 1;
+}

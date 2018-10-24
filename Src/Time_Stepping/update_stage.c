@@ -145,11 +145,11 @@ void UpdateStage(const Data *d, Data_Arr UU, double **aflux,
      #elif EOS==PVTE_LAW
        for (nv=NVAR; nv--;) v[nv] = d->Vc[nv][k][j][i];
        if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
-         print1("UpdateStage:[Ema] Error computing temperature!");
+         print1("UpdateStage:[Ema]Err.comp.temp");
        }
        T[k][j][i] = T[k][j][i] / (KELVIN);
      #else
-       print1("UpdateStage:[Ema] Error computing temperature, this EOS not implemented!")
+       print1("UpdateStage:[Ema]Err.comp.temp, this EOS not implemented!")
      #endif
    }
   #endif

@@ -181,6 +181,16 @@ int main (int argc, char *argv[])
   /* ------------------------------------------------------
                 Dump log information
      ------------------------------------------------------ */
+    /*[Ema] Check log file size, this must be done even if log is not required at this step,
+    as some other log may be done by other parts of the program, so the log file might grow anyway*/
+    #ifdef MAX_LOGSIZE_MIB
+      double logsize = CheckLogSize_MiB();
+      if ( logsize > MAX_LOGSIZE_MIB) {
+        print1("\nSize of logfile(%f MiB) exceeds limit(%f MiB)", logsize, MAX_LOGSIZE_MIB);
+        QUIT_PLUTO(1);
+      }
+    #endif
+    /*[Ema] End check log file size*/
 
     if (g_stepNumber%ini.log_freq == 0) {
       print1 ("step:%d ; t = %10.4e ; dt = %10.4e ; %d %% ; [%f, %d",

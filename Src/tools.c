@@ -14,6 +14,13 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
+/*Added by [Ema]*/
+#ifdef MAX_LOGSIZE_MIB
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <unistd.h>
+#endif
+/*End added by [Ema]*/
 
 /* ********************************************************************* */
 int CheckNaN (double **u, int is, int ie, int id)
@@ -440,3 +447,21 @@ void WriteAsciiFile (char *fname, double *q, int nvar)
   fclose(fp);
   
 }
+
+/*[Ema] Check log file size, added by Ema*/
+#ifdef MAX_LOGSIZE_MIB
+  double CheckLogSize_MiB() {
+    struct stat st;
+    // stat() returns -1 on error
+
+    if (stat(log_file_name, &st)) {
+      printf("\nError checking size of logfile (%s)!", log_file_name);
+      return -1.0;
+    } else {
+      // printf("File size: %lf MiB\n", (double)st.st_size/1048576);
+      // Return size in MiB
+      return (double)st.st_size/1048576;
+    }
+  }
+#endif
+/*[Ema] end check log file size*/

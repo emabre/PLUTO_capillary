@@ -113,12 +113,12 @@ double ParabolicRHS (const Data *d, Data_Arr dU, double dt, Grid *grid)
       TOT_LOOP(k,j,i) {
         for (nv=NVAR; nv--;) v[nv] = V[nv][k][j][i];
         if (GetPV_Temperature(v, &(T[k][j][i]) )!=0) {
-          print1("ParabolicRHS:[Ema] Error computing temperature!\n");
+          print1("ParabolicRHS:[Ema]Err.comp.temp.\n");
         }
         T[k][j][i] = T[k][j][i] / (KELVIN);
       }
     #else
-      print1("ParabolicRHS:[Ema] Error computing temperature, this EOS not implemented!")
+      print1("ParabolicRHS:[Ema]Err.comp.temp, this EOS not implemented!")
     #endif
     vh     = state.vh;
     tc_flx = state.tc_flux;

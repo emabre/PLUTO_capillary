@@ -195,6 +195,9 @@ void WritePNG (double ***, char *, char *, Grid *);
 void print  (const char *fmt, ...);
 void print1 (const char *fmt, ...);
 void Trace (double);
+/* Added by [Ema] */
+double CheckLogSize_MiB();
+/* End added by [Ema]*/
 
 /* ---------------------------------------------------------------------
             Prototyping for Boundary condition functions

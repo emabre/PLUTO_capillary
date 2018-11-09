@@ -288,14 +288,15 @@ void Where (int i, Grid *grid)
   )
 
   D_SELECT(
-    print ("zone [x1(%d) = %f]",
+    // [Ema] In the following three messages I changed a bit the format to make log files shorter
+    print ("in [x1(%d)=%f]",
             ii, grid1->x[ii]);  ,
 
-    print ("zone [x1(%d) = %f, x2(%d) = %f]",
+    print ("in [x1(%d)=%f,x2(%d)=%f]",
             ii, grid1->x[ii], 
             jj, grid2->x[jj]);  ,
 
-    print ("zone [x1(%d) = %f, x2(%d) = %f, x3(%d) = %f]",
+    print ("in [x1(%d)=%f,x2(%d)=%f,x3(%d)=%f]",
             ii, grid1->x[ii], 
             jj, grid2->x[jj],
             kk, grid3->x[kk]);

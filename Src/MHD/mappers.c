@@ -231,12 +231,30 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
     if (err){  /* If something went wrong while retrieving the  */
                /* temperature, we floor \c T to \c T_CUT_RHOE,  */
                /* recompute internal and total energies.        */
-      print1("! ConsToPrim: rhoe=%g, T=%g\n", rhoe, T); //[Ema]: I add this for more clarity
-      T = T_CUT_RHOE;
+      // print1("! ConsToPrim: rhoe=%g,T=%g\n", rhoe, T); //[Ema]: I add this for more clarity
+      // Additional Macro #if wrapping added by [Ema]
+      #if WARN_CTP_FAIL
+      // end [Ema]
       WARNING(
-        print ("! ConsToPrim: rhoe < 0 or T < T_CUT_RHOE; ");
+        // [Ema] Added by Ema (to make log files shorter)
+        if (rhoe<0) {
+          print ("! ConsToPrim:rhoe=%g<0", rhoe);
+        } else if (T<T_CUT_RHOE) {
+          print ("! ConsToPrim:T=%g<T_CUT_RHOE", T);
+        } else {
+          print ("! ConsToPrim:Something unexpected happened!");
+          QUIT_PLUTO(1);
+        }
+        // End added by Ema
+        /* Original version:
+        print ("! rhoe<0 or T<T_CUT_RHOE;");
+        */
         Where(i,NULL);
       )
+      // Additional Macro #if wrapping added by [Ema]
+      #endif
+      // end [Ema]
+      T = T_CUT_RHOE;
       rhoe     = InternalEnergy(v, T);
       u[ENG]   = rhoe + kinb2; /* -- redefine total energy -- */
       flag[i] |= FLAG_CONS2PRIM_FAIL;

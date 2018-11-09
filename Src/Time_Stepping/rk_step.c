@@ -205,7 +205,9 @@ int AdvanceStep (const Data *d, Riemann_Solver *Riemann,
 #endif /* TIME_STEPPING == RK3 */
 
 /*Added by [Ema]*/
+#if EN_CONS_CHECK
   en_adv_in += en_in_partial;
+#endif
 /*End added by [Ema]*/
 
 #ifdef FARGO

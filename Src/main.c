@@ -455,6 +455,7 @@ int main (int argc, char *argv[])
   #endif
 
   time(&tend);
+  // Comment added by [Ema]: I don't understand, this seems to spoil a variable which already has another meaning
   g_dt = difftime(tend, tbeg);
   print1("> Elapsed time             %s\n", TotalExecutionTime(g_dt));
   print1("> Average time/step       %10.2e  (sec)  \n",

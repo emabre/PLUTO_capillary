@@ -197,7 +197,7 @@ double Pressure(double *v, double T)
   rho = v[RHO];
   status = InverseLookupTable2D(&Ttab, rho, T, &T1);
   if (status != 0){
-    print ("! Pressure: table interpolation failure [rho = %12.6e]\n", rho);
+    print ("! Pressure: table interpolation failure [rho = %12.6e]\n", rho*UNIT_DENSITY);
     QUIT_PLUTO(1);
   }
 

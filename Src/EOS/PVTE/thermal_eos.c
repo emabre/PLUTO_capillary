@@ -250,6 +250,11 @@ int GetPV_Temperature (double *v, double *T)
   if (v[PRS] < 0.0) return 1;
 
   rho    = v[RHO];
+  /*Comment added by [Ema]: Here it normalizes the pressure by the rho.
+  Don't worry: it is not computing some temperarture by dividing pressure by rho (which would be correct only
+  in case of ideal gas law, but not for a general pvte law).
+  See description of MakePV_TemperatureTable() in the Doxigen doc. 	
+ */
   T1     = v[PRS]/rho;
   status = Table2DInterpolate(&Ttab, T1, rho, T);
 

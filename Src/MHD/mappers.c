@@ -66,6 +66,13 @@ void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
     if (status != 0){
       T      = T_CUT_RHOE;
       v[PRS] = Pressure(v, T);
+    /*[Ema] Added by Ema */
+    #ifdef T_MAX_HARD_RESET
+    } else if (T > T_MAX_HARD_RESET) {
+      T      = T_MAX_HARD_RESET;
+      v[PRS] = Pressure(v, T);
+    #endif
+    /*[Ema] End added by Ema */
     }
     rhoe   = InternalEnergy(v, T);
     u[ENG] = rhoe + kinb2;
@@ -259,6 +266,16 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
       u[ENG]   = rhoe + kinb2; /* -- redefine total energy -- */
       flag[i] |= FLAG_CONS2PRIM_FAIL;
       ifail    = 1;
+    /*[Ema] Added by Ema */
+    #ifdef T_MAX_HARD_RESET
+    } else if (T > T_MAX_HARD_RESET) {
+      T = T_MAX_HARD_RESET;
+      rhoe     = InternalEnergy(v, T);
+      u[ENG]   = rhoe + kinb2; /* -- redefine total energy -- */
+      flag[i] |= FLAG_CONS2PRIM_FAIL;
+      ifail    = 1;
+    #endif
+    /*[Ema] End added by Ema */
     }
     v[PRS] = Pressure(v, T);
 

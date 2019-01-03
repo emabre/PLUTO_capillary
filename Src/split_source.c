@@ -71,12 +71,13 @@ void SplitSource (const Data *d, double dt, Time_Step *Dts, Grid *grid)
 
   /*[Ema] For use of ADI*/
   #if (PARABOLIC_FLUX & ALTERNATING_DIRECTION_IMPLICIT)
-   #if VISCOSITY != NO
+   #if VISCOSITY == ALTERNATING_DIRECTION_IMPLICIT
     #error Viscosity not implemented in ADI algorithm
    #endif
-   #if (PARABOLIC_FLUX & SUPER_TIME_STEPPING)
-    #error ADI implemented here is not compatible with STS
-   #endif
+  //  #if (PARABOLIC_FLUX & SUPER_TIME_STEPPING)
+  //   #error ADI implemented here is not compatible with STS
+  //  #endif
    ADI (d, Dts, grid);
   #endif
+  /*[Ema] End added by Ema*/
 }

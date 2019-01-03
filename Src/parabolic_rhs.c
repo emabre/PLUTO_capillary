@@ -36,6 +36,9 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
+/* [Ema] To support internal corner */
+#include "capillary_wall.h"
+/* End added by [Ema]*/
 
 #define ADD_RESISTIVITY (RESISTIVITY == SUPER_TIME_STEPPING || \
                          RESISTIVITY == RK_CHEBYSHEV)
@@ -131,6 +134,15 @@ max_inv_dtp[0] = max_inv_dtp[1] = max_inv_dtp[2] = 0.0;
    ---------------------------------------------------------------------- */
 
   g_dir = IDIR;
+  /*[Ema] Correction to support internal corner
+  (I am not 100% sure this is fully correct, due to mixed derivaves and centering
+  of quantities maybe in a sweep in the direction g_dir the correction values for the
+  other direction are still needed in some cases? This is likely to happen with viscosity,
+  while certainly there is no problem with thermal conduction)*/
+  #if (INTERNAL_BOUNDARY == YES) && (MULTIPLE_GHOSTS == YES)
+    ApplyMultipleGhosts(d, g_dir);
+  #endif
+  /* End added by [Ema]*/
   A   = grid[g_dir].A;
   rp  = grid[g_dir].xr;
   #if ADD_RESISTIVITY  && !(defined STAGGERED_MHD)
@@ -322,6 +334,15 @@ max_inv_dtp[0] = max_inv_dtp[1] = max_inv_dtp[2] = 0.0;
 
 #if DIMENSIONS > 1
   g_dir = JDIR;
+  /*[Ema] Correction to support internal corner
+  (I am not 100% sure this is fully correct, due to mixed derivaves and centering
+  of quantities maybe in a sweep in the direction g_dir the correction values for the
+  other direction are still needed in some cases? This is likely to happen with viscosity,
+  while certainly there is no problem with thermal conduction)*/
+  #if (INTERNAL_BOUNDARY == YES) && (MULTIPLE_GHOSTS == YES)
+    ApplyMultipleGhosts(d, g_dir);
+  #endif
+  /* End added by [Ema]*/
   A     = grid[g_dir].A;
   #if ADD_RESISTIVITY  && !(defined STAGGERED_MHD)
    GetCurrent(d, g_dir, grid);
@@ -470,6 +491,15 @@ max_inv_dtp[0] = max_inv_dtp[1] = max_inv_dtp[2] = 0.0;
 
 #if DIMENSIONS == 3
   g_dir = KDIR;
+  /*[Ema] Correction to support internal corner
+  (I am not 100% sure this is fully correct, due to mixed derivaves and centering
+  of quantities maybe in a sweep in the direction g_dir the correction values for the
+  other direction are still needed in some cases? This is likely to happen with viscosity,
+  while certainly there is no problem with thermal conduction)*/
+  #if (INTERNAL_BOUNDARY == YES) && (MULTIPLE_GHOSTS == YES)
+    ApplyMultipleGhosts(d, g_dir);
+  #endif
+  /* End added by [Ema]*/
   A   = grid[g_dir].A;
   #if ADD_RESISTIVITY && !(defined STAGGERED_MHD)
    GetCurrent(d, g_dir, grid);

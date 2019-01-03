@@ -229,7 +229,7 @@ void ViscousFlux (Data_Arr V, double **ViF, double **ViS,
              ViS[i][MX2] = 0.0;            ,  
              ViS[i][MX3] = 0.0; ) 
 
-     #elif GEOMETRY == POLAR 
+    #elif GEOMETRY == POLAR 
       
       r    = grid[IDIR].xr;    th = grid[JDIR].x;
       dr   = grid[IDIR].dx[i]; dr_1 = 1.0/dr;
@@ -264,7 +264,7 @@ void ViscousFlux (Data_Arr V, double **ViF, double **ViS,
              ViS[i][MX2] = 0.0;                                  ,
              ViS[i][MX3] = 0.0;)
                                             
-     #elif GEOMETRY == SPHERICAL
+      #elif GEOMETRY == SPHERICAL
 
       r = grid[IDIR].xr; th = grid[JDIR].x;
       dr_1 = 1.0/grid[IDIR].dx[i]; r_1  = 1.0/grid[IDIR].xr[i];

@@ -21,6 +21,10 @@
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
 
+#ifdef RHO_MIN_HARD_RESET
+  #define RHO_MIN_HARD_RESET_A  (RHO_MIN_HARD_RESET/UNIT_DENSITY)
+#endif
+
 /* ********************************************************************* */
 void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
 /*!
@@ -45,7 +49,22 @@ void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
     v = uprim[i];
     u = ucons[i];
 
+    /*[Ema] (added by Ema) hard reset of rho*/
+//    #ifdef RHO_MIN_HARD_RESET_A 
+//    if(v[RHO]<RHO_MIN_HARD_RESET_A) {
+//    u[RHO] = RHO_MIN_HARD_RESET_A;
+//    } else {
+//    #endif 
+    /*[Ema] end added by Ema*/
+
     u[RHO] = v[RHO];
+    
+    /*[Ema] Added by Ema*/
+//    #ifdef RHO_MIN_HARD_RESET_A 
+//    }
+//    #endif
+    /*[Ema] End added by Ema*/
+ 
     /*[Ema] Computes momentum*/
     EXPAND (u[MX1] = v[RHO]*v[VX1];  ,
             u[MX2] = v[RHO]*v[VX2];  ,
@@ -144,6 +163,14 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
       flag[i] |= FLAG_CONS2PRIM_FAIL;
       ifail    = 1;
     }
+
+    /*[Ema] Added by Ema*/
+    #ifdef RHO_MIN_HARD_RESET_A
+    if (u[RHO]<RHO_MIN_HARD_RESET_A) 
+       u[RHO] = RHO_MIN_HARD_RESET_A;
+    flag[i] |= FLAG_CONS2PRIM_FAIL; 
+    #endif 
+    /*End added by Ema*/
 
   /* -- Compute density, velocity, mag. field and scalars -- */
 

@@ -166,9 +166,10 @@ int ConsToPrim (double **ucons, double **uprim, int ibeg, int iend,
 
     /*[Ema] Added by Ema*/
     #ifdef RHO_MIN_HARD_RESET_A
-    if (u[RHO]<RHO_MIN_HARD_RESET_A) 
-       u[RHO] = RHO_MIN_HARD_RESET_A;
-    flag[i] |= FLAG_CONS2PRIM_FAIL; 
+    if (u[RHO]<RHO_MIN_HARD_RESET_A) {
+      u[RHO] = RHO_MIN_HARD_RESET_A;
+      flag[i] |= FLAG_CONS2PRIM_FAIL;
+    }
     #endif 
     /*End added by Ema*/
 

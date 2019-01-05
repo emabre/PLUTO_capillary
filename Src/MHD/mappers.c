@@ -86,11 +86,11 @@ void PrimToCons (double **uprim, double **ucons, int ibeg, int iend)
       T      = T_CUT_RHOE;
       v[PRS] = Pressure(v, T);
     /*[Ema] Added by Ema */
-    #ifdef T_MAX_HARD_RESET
-    } else if (T > T_MAX_HARD_RESET) {
-      T      = T_MAX_HARD_RESET;
-      v[PRS] = Pressure(v, T);
-    #endif
+    // #ifdef T_MAX_HARD_RESET
+    // } else if (T > T_MAX_HARD_RESET) {
+    //   T      = T_MAX_HARD_RESET;
+    //   v[PRS] = Pressure(v, T);
+    // #endif
     /*[Ema] End added by Ema */
     }
     rhoe   = InternalEnergy(v, T);

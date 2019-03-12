@@ -11,3 +11,5 @@ I made some code to integrate PLUTO with an ADI scheme for thermal conduction an
 I applied some other minor changes and added some comments.
 # Original Readme file
 The original Readme file is now named README_original
+
+Emanuele Brentegani

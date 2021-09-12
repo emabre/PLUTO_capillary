@@ -11,8 +11,8 @@ Everything is provided with no warranty at all. If you use it you do it at your 
 + I changed the way temperature is computed for thermal conduction (in this version it is more general than simply p/rho).
 + I added some code to handle an internal corner in internal boundary.
 + I implemented and integrated into PLUTO an **alternating direction implicit** scheme for thermal conduction and resistivity.
-+ Fruthermore, I have implemented accurate transport parameters (electrical resistivity and thermal conductivity) and dissociation law for _low_ temperature hydrogen (approx 1eV) inside [_capillary_](https://github.com/emabre/capillary)
-I applied some other minor changes and added some comments.
++ Furthermore, I have implemented accurate transport parameters (electrical resistivity and thermal conductivity) and dissociation law for _low_ temperature hydrogen (approx 1eV) inside [_capillary_](https://github.com/emabre/capillary)
++ I applied some other minor changes and added some comments
 # Original Readme file
 The original Readme file is now named README_original
 
